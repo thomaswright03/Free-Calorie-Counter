@@ -141,6 +141,9 @@ export function buildWeightField(view) {
   const status = createFieldStatus(input);
   // How it saves, said before anything is typed; a status (Saving…, Saved,
   // an error) shows in its place while there is one.
+  // The two share one space (.field-note), so the Log Meal button below
+  // doesn't jump when the box is left and the hint gives way to the status:
+  // a tap on it would otherwise land where it used to be.
   const hint = h('p', { class: 'field-hint', id: uid('weight-hint'), text: 'Pounds only. Saves when you leave the box' });
   input.setAttribute('aria-describedby', `${status.el.id} ${hint.id}`);
   const saver = weightSaver(view, input, status);
@@ -156,7 +159,7 @@ export function buildWeightField(view) {
   });
 
   return {
-    root: h('div', { class: 'field' }, h('label', { for: input.id, text: 'Weight (lbs)' }), input, status.el, hint),
+    root: h('div', { class: 'field' }, h('label', { for: input.id, text: 'Weight (lbs)' }), input, h('div', { class: 'field-note' }, status.el, hint)),
     flush: saver.flush,
     leave: saver.leave,
     mounted: () => {

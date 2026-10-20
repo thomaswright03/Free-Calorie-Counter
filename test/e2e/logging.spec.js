@@ -544,3 +544,13 @@ test('an Undo offered after leaving Today leaves a meal logged again since as it
   await expect(page.locator('.toast').filter({ hasText: 'Breakfast has been logged again since' })).toBeVisible();
   expect((await data.entry(TODAY)).meals.breakfast).toBe(300);
 });
+
+test('leaving the weight box doesn’t move the Log Meal button, so a tap on it lands', async ({ page, appURL }) => {
+  await page.goto(appURL);
+  const button = page.getByRole('link', { name: 'Log Meal' });
+  const before = await button.boundingBox();
+  await page.getByLabel('Weight (lbs)').fill('180.4');
+  await page.getByLabel('Weight (lbs)').blur();
+  await expect(page.getByText('Saved', { exact: true })).toBeVisible();
+  expect((await button.boundingBox()).y).toBe(before.y);
+});
