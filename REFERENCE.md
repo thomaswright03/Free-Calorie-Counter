@@ -386,3 +386,14 @@ the published branch: whatever is in its `docs/` folder is the live app.
 Other branches are not published until they are merged into it.
 Pages serves the files in `docs/` as they are, which is why the built files
 in `docs/build/` are committed (see above).
+
+## Legal
+
+- Privacy policy `docs/privacy.html` and terms `docs/terms.html`, linked
+  from Settings → Free and private. No cookies are set and browser storage
+  is strictly necessary, so there is no cookie banner.
+- Contact for both: thomas@wrightaisolutions.com (given by the owner,
+  2026-10-20).
+- Lawyer review: the owner reported on 2026-10-20 that a lawyer reviewed the
+  app (health data) and said it is good to go. Reviewer's name and the date
+  of the review: not yet recorded.
