@@ -338,6 +338,9 @@ input[aria-invalid='true'] { border-color: var(--danger); }
 .field-status.is-error { color: var(--danger); }
 .field-hint { margin: var(--s1) 0 0; font-size: var(--fs-sm); color: var(--muted); }
 .field-status:not(:empty) + .field-hint { display: none; }
+.field-note { display: grid; }
+.field-note > * { grid-area: 1 / 1; }
+.field-note > .field-status:not(:empty) + .field-hint { display: block; visibility: hidden; }
 
 /* ------------------------------------------------------------ buttons */
 

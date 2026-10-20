@@ -17,5 +17,6 @@ export const LATEST_UPDATE = {
     'The weight box says “Pounds only”.',
     'The app icon and browser tab icon are the new apple trend logo.',
     'Settings → Free and private links to the new Privacy policy and Terms of service.',
+    'Tapping Log Meal right after typing your weight works on the first tap again (the button no longer shifts when the weight saves).',
   ],
 };
