@@ -114,3 +114,16 @@ test('the wide layout (tabs in the header, History month by month) and a photo t
   const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'best-practice']).analyze();
   expect(results.violations.map((v) => `photo viewer: ${v.id} — ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`)).toEqual([]);
 });
+
+test('the privacy policy and terms of service have no problems axe can find, in either theme', async ({ page, appURL }) => {
+  await page.goto(appURL);
+  for (const theme of ['light', 'dark']) {
+    await page.evaluate((t) => localStorage.setItem('fcc:theme', t), theme);
+    for (const name of ['privacy.html', 'terms.html']) {
+      await page.goto(`${appURL}/${name}`);
+      const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'best-practice']).analyze();
+      const found = results.violations.map((v) => `${name} (${theme}): ${v.id} — ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`);
+      expect(found).toEqual([]);
+    }
+  }
+});

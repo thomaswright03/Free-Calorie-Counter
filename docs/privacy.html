@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f1f5f9" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)">
+<title>Privacy policy · Free Calorie Counter</title>
+<meta name="description" content="Free Calorie Counter collects no personal data. Everything you log stays on your own device.">
+<script>
+  // The theme chosen in Free Calorie Counter's Settings, or the system's.
+  (function () {
+    var pref = 'system';
+    try { pref = localStorage.getItem('fcc:theme') || 'system'; } catch (e) { pref = 'system'; }
+    var dark = pref === 'dark' || (pref !== 'light' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+  })();
+</script>
+<link rel="stylesheet" href="legal.css">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+</head>
+<body>
+<main class="card">
+  <p class="brand">Free Calorie Counter</p>
+  <h1>Privacy policy</h1>
+  <p class="updated">Effective 20 October 2026</p>
+
+  <p class="summary"><strong>In short:</strong> we don’t collect, see or store any of your information. Everything you enter in Free Calorie Counter stays on your own device. There’s no account, no server, no analytics, no ads, no trackers and no cookies.</p>
+
+  <h2>Who we are</h2>
+  <p>Free Calorie Counter is a free calorie and weight tracker made available by its developer as a personal, non-commercial project (“we”, “us”). This policy covers the app at <a href="https://thomaswright03.github.io/Free-Calorie-Counter/">thomaswright03.github.io/Free-Calorie-Counter</a>, whether you use it in a browser or added to your Home Screen.</p>
+
+  <h2>What the app keeps on your device</h2>
+  <p>To work, the app saves what you enter in your browser’s storage on your device (called local storage and IndexedDB). That includes:</p>
+  <ul>
+    <li>the meals and calories you log, your weight, and your goals;</li>
+    <li>meal photos you choose to add;</li>
+    <li>your settings, such as light or dark theme and chart range;</li>
+    <li>a log of problems the app ran into, so you can see what went wrong;</li>
+    <li>small notes the app needs, such as when you last saved a backup.</li>
+  </ul>
+  <p>This information never leaves your device on its own. The app has no server, so we can’t see it, and nothing is uploaded, shared or sold. Calorie, weight and photo records can be sensitive health information, so we recommend keeping your device locked: anyone who can use your unlocked device can open the app and see them.</p>
+
+  <h2>What we don’t do</h2>
+  <ul>
+    <li>No account or sign-in, and we never ask for your name, email or phone number.</li>
+    <li>No analytics, advertising, tracking pixels, chat widgets or social media plugins.</li>
+    <li>No artificial intelligence services: nothing you enter is sent to an AI provider.</li>
+    <li>No selling, renting or sharing of personal information, and no use of it for advertising.</li>
+    <li>No emails, texts or notifications sent to you.</li>
+  </ul>
+
+  <h2>Cookies and similar technology</h2>
+  <p>Free Calorie Counter doesn’t use cookies. It uses your browser’s storage only to do what you ask it to: remember what you’ve logged and your settings, and keep a copy of the app’s own files so it opens without a connection. This storage is strictly necessary for the app to work, it’s never used to track you or show you ads, and nothing in it is read by us or anyone else. Because of that, the app doesn’t show a cookie banner or ask for cookie consent.</p>
+
+  <h2>Hosting</h2>
+  <p>The app’s files are served by GitHub Pages, a service of GitHub, Inc. in the United States. When your device downloads the app or checks for an update, GitHub receives the technical details any website receives, such as your IP address and browser type, and may keep them in its own logs for security and operations. We don’t get access to those logs. GitHub’s handling of this information is covered by the <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">GitHub General Privacy Statement</a>. The data you enter in the app is never sent to GitHub.</p>
+
+  <h2>Backups and things you choose to send</h2>
+  <p>You can export a backup file, and you can copy the problem log. Where that goes is up to you: for example Files, iCloud Drive or an email you write. Once you send it somewhere, the privacy terms of that service apply. A backup file contains everything you’ve logged, including photos, so keep it somewhere private. If you send us a problem log or backup to help with a problem, we’ll use it only for that and delete it afterwards.</p>
+
+  <h2>Deleting your data</h2>
+  <p>Because your data is only on your device, you’re in control of it. To delete it, remove the app from your Home Screen, or clear this website’s data in your browser settings (on iPhone: Settings, Apps, Safari, Advanced, Website Data). We can’t recover deleted data for you, so export a backup first if you might want it later.</p>
+
+  <h2>Your privacy rights</h2>
+  <p>Privacy laws such as the GDPR in the UK and EU and state laws in the US, including California’s, give you rights to access, correct, delete or move your personal information, and to opt out of its sale or sharing. We don’t hold any personal information about you, so there’s nothing for us to hand over, change or delete, and we don’t sell or share any. You can see, change, export and delete everything yourself in the app. If you have a question about your rights, contact us using the details below.</p>
+
+  <h2>Children</h2>
+  <p>Free Calorie Counter isn’t meant for children under 13, and we don’t knowingly collect information from anyone, including children.</p>
+
+  <h2>Changes to this policy</h2>
+  <p>If we change how the app handles information, we’ll update this page and the date at the top. If a change means data would leave your device, we’ll explain it in the app before it happens.</p>
+
+  <h2>Contact</h2>
+  <p>Questions about this policy or the app can be raised on the app’s <a href="https://github.com/thomaswright03/Free-Calorie-Counter/issues">GitHub page</a>. Please don’t post your personal health information there, because it’s public.</p>
+
+  <p class="foot"><a href="terms.html">Terms of service</a></p>
+  <a class="back" href="./">Back to Free Calorie Counter</a>
+</main>
+</body>
+</html>

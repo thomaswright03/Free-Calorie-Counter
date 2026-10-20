@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f1f5f9" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)">
+<title>Terms of service · Free Calorie Counter</title>
+<meta name="description" content="The terms for using Free Calorie Counter, a free calorie and weight tracker.">
+<script>
+  // The theme chosen in Free Calorie Counter's Settings, or the system's.
+  (function () {
+    var pref = 'system';
+    try { pref = localStorage.getItem('fcc:theme') || 'system'; } catch (e) { pref = 'system'; }
+    var dark = pref === 'dark' || (pref !== 'light' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+  })();
+</script>
+<link rel="stylesheet" href="legal.css">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+</head>
+<body>
+<main class="card">
+  <p class="brand">Free Calorie Counter</p>
+  <h1>Terms of service</h1>
+  <p class="updated">Effective 20 October 2026</p>
+
+  <p class="summary"><strong>In short:</strong> Free Calorie Counter is free to use for your own tracking. It isn’t medical advice. Your data lives only on your device, so keeping backups is up to you. The app is provided as it is, without guarantees.</p>
+
+  <h2>Agreeing to these terms</h2>
+  <p>These terms apply when you use Free Calorie Counter (“the app”), made available by its developer as a personal, non-commercial project (“we”, “us”). By using the app you agree to them. If you don’t agree, please don’t use the app. Our <a href="privacy.html">privacy policy</a> explains how the app handles information.</p>
+
+  <h2>Using the app</h2>
+  <p>You may use the app free of charge for your own personal, non-commercial tracking. There’s no account and no payment. Please don’t try to disrupt the app or the website it’s served from, interfere with other people’s use of it, or use it for anything unlawful.</p>
+
+  <h2>Not medical advice</h2>
+  <p>The app helps you record what you eat and weigh and shows your own numbers back to you. It doesn’t give medical, nutritional or diet advice, and nothing in it replaces advice from a doctor, dietitian or other qualified professional. Talk to a health professional before starting a diet or changing what you eat, especially if you’re pregnant, under 18, have a medical condition, or have or have had an eating disorder. If tracking calories or weight is making you feel worse, please stop and reach out for support. In an emergency, call your local emergency number.</p>
+
+  <h2>Your information and backups</h2>
+  <p>Everything you enter stays on your device and belongs to you. We don’t receive or keep a copy, so we can’t restore it. Your browser or device can delete it, for example when you clear website data, when the device runs low on space, or, on iPhone and iPad, when the app is used in a Safari tab and not opened for about a week. Exporting backup files regularly, and keeping them somewhere safe, is your responsibility.</p>
+
+  <h2>Accuracy</h2>
+  <p>Calorie totals, averages, charts and trends are worked out from what you enter. We don’t check that the numbers you enter are correct, and we can’t promise that every calculation or chart is free of mistakes.</p>
+
+  <h2>Changes to the app</h2>
+  <p>We may change, update or stop offering the app, or any part of it, at any time, without notice. Updates download automatically when your device is online.</p>
+
+  <h2>No warranty</h2>
+  <p>The app is provided free, “as is” and “as available”. To the fullest extent the law allows, we make no promises or warranties of any kind, express or implied, including that the app will be accurate, available, secure, free of errors, or suitable for a particular purpose.</p>
+
+  <h2>Limit of liability</h2>
+  <p>To the fullest extent the law allows, we aren’t liable for any loss or damage that comes from using or being unable to use the app, including lost data, or for any indirect or consequential loss. Some places don’t allow these limits, so they may not all apply to you. Nothing in these terms takes away rights you have under the consumer laws where you live that can’t be limited by agreement.</p>
+
+  <h2>Other services</h2>
+  <p>The app is served by GitHub Pages, and you may use other services, such as iCloud Drive or email, to store or send your backup files. Those services have their own terms, and we aren’t responsible for them.</p>
+
+  <h2>Changes to these terms</h2>
+  <p>We may update these terms. When we do, we’ll change the date at the top of this page. Continuing to use the app after a change means you accept the updated terms.</p>
+
+  <h2>Contact</h2>
+  <p>Questions about these terms can be raised on the app’s <a href="https://github.com/thomaswright03/Free-Calorie-Counter/issues">GitHub page</a>.</p>
+
+  <p class="foot"><a href="privacy.html">Privacy policy</a></p>
+  <a class="back" href="./">Back to Free Calorie Counter</a>
+</main>
+</body>
+</html>

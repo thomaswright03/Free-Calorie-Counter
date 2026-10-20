@@ -66,7 +66,8 @@ async function buildYourDataCard() {
     { class: 'card', 'data-your-data': '' },
     h('h3', { class: 'section-title', text: 'Free and private' }),
     h('p', { class: 'card-sub', text: 'Free Calorie Counter is completely free, with no account, no ads and no subscription.' }),
-    h('p', { class: 'card-sub', text: 'Your calories, weight and photos are saved only in this browser on this device. Free Calorie Counter has no server, so nothing is ever uploaded.' })
+    h('p', { class: 'card-sub', text: 'Your calories, weight and photos are saved only in this browser on this device. Free Calorie Counter has no server, so nothing is ever uploaded.' }),
+    h('p', { class: 'card-sub', 'data-legal-links': '' }, h('a', { class: 'btn-text', href: 'privacy.html', text: 'Privacy policy' }), ' · ', h('a', { class: 'btn-text', href: 'terms.html', text: 'Terms of service' }))
   );
   storageCard.append(
     h('p', {

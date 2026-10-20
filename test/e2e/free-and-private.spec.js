@@ -17,3 +17,28 @@ test('a new user is told on Today that Free Calorie Counter is free and their da
   await expect(page.getByRole('heading', { name: 'Today', exact: true })).toBeVisible();
   await expect(page.locator('main [data-your-data]')).toHaveCount(0);
 });
+
+test('Settings links to the privacy policy and terms of service, which lead back into the app', async ({ page, appURL }) => {
+  await page.goto(`${appURL}/#/settings`);
+  const links = page.locator('main [data-legal-links]');
+  await links.getByRole('link', { name: 'Privacy policy' }).click();
+  await expect(page.getByRole('heading', { name: 'Privacy policy', level: 1 })).toBeVisible();
+  await expect(page.getByText('we don’t collect, see or store any of your information')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Cookies and similar technology' })).toBeVisible();
+  await page.getByRole('link', { name: 'Terms of service' }).click();
+  await expect(page.getByRole('heading', { name: 'Terms of service', level: 1 })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Not medical advice' })).toBeVisible();
+  await page.getByRole('link', { name: 'Back to Free Calorie Counter' }).click();
+  await expect(page.getByRole('heading', { name: 'Today', exact: true })).toBeVisible();
+});
+
+test('the privacy policy and terms follow the app’s theme', async ({ page, appURL }) => {
+  for (const scheme of ['light', 'dark']) {
+    await page.emulateMedia({ colorScheme: scheme });
+    for (const name of ['privacy.html', 'terms.html']) {
+      await page.goto(`${appURL}/${name}`);
+      const bg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+      expect(bg, `${name} ${scheme}`).toBe(scheme === 'light' ? 'rgb(241, 245, 249)' : 'rgb(15, 23, 42)');
+    }
+  }
+});
