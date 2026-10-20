@@ -392,6 +392,7 @@ in `docs/build/` are committed (see above).
 - Privacy policy `docs/privacy.html` and terms `docs/terms.html`, linked
   from Settings → Free and private. No cookies are set and browser storage
   is strictly necessary, so there is no cookie banner.
+- Operator named on both pages: Wright AI Solutions.
 - Contact for both: thomas@wrightaisolutions.com (given by the owner,
   2026-10-20).
 - Lawyer review: the owner reported on 2026-10-20 that a lawyer reviewed the
