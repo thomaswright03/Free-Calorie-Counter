@@ -5,6 +5,7 @@ import { failureText, recordProblem } from './problems.js';
 import { createStatusLine } from './feedback.js';
 import { store } from './store.js';
 import { importBackupFile, daysAndPhotos } from './backup-import.js';
+import { getGoal } from './goal.js';
 
 /** @param {Blob} blob @param {string} filename */
 export function downloadBlob(blob, filename) {
@@ -34,7 +35,7 @@ export async function exportBackup(onProgress) {
   const days = {};
   for (const e of visibleEntries(entries)) days[e.date] = core.entryForBackup(e);
   const photos = await store.listPhotos();
-  const writer = window.AppBackupFile.createBackupWriter(days, new Date().toISOString());
+  const writer = window.AppBackupFile.createBackupWriter(days, new Date().toISOString(), getGoal());
   for (let i = 0; i < photos.length; i += 1) {
     onProgress(`Adding photos: ${i + 1} of ${photos.length}…`, i, photos.length);
     const blob = await store.getPhotoBlob(photos[i]);

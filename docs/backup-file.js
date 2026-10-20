@@ -26,11 +26,12 @@
    * Starts a backup file. Add photos one at a time, then call finish().
    * @param {Record<string, Entry>} entries
    * @param {string} exportedAt ISO time
+   * @param {number | null} [dailyGoal] the daily calorie goal, if one is set
    */
-  function createBackupWriter(entries, exportedAt) {
+  function createBackupWriter(entries, exportedAt, dailyGoal = null) {
     /** @type {BlobPart[]} */
     const parts = [
-      `{"app":"free-calorie-counter","version":${core.BACKUP_VERSION},"exportedAt":${JSON.stringify(exportedAt)},"entries":${JSON.stringify(entries)},"photos":[`,
+      `{"app":"free-calorie-counter","version":${core.BACKUP_VERSION},"exportedAt":${JSON.stringify(exportedAt)},"settings":${JSON.stringify({ dailyGoal })},"entries":${JSON.stringify(entries)},"photos":[`,
     ];
     let count = 0;
     return {
@@ -310,7 +311,7 @@
    * @param {Blob} blob
    * @param {{ onProgress?: (photosChecked: number) => void, latestDay?: string }} [options] days after
    *   `latestDay` are left out and counted (see core.checkBackupDays)
-   * @returns {Promise<{ ok: true, entries: Record<string, Entry>, dayCount: number, photoCount: number, futureDays: number, skipped: string[] } | { ok: false, error: string }>}
+   * @returns {Promise<{ ok: true, entries: Record<string, Entry>, dayCount: number, photoCount: number, futureDays: number, skipped: string[], dailyGoal: number | null } | { ok: false, error: string }>}
    */
   async function checkBackup(blob, options) {
     const onProgress = options && options.onProgress;
@@ -337,9 +338,11 @@
     skipped.push(...photoProblems);
     if (top.photos !== undefined && !photosIsArray) skipped.push('The photos section is not in the expected format.');
     const dayCount = Object.keys(days.entries).length;
+    const settings = /** @type {any} */ (top.settings);
+    const dailyGoal = core.goalFromData(settings && typeof settings === 'object' ? settings.dailyGoal : null);
     const refused = core.backupRefusal(skipped, dayCount + photoCount);
     if (refused) return { ok: false, error: refused };
-    return { ok: true, entries: days.entries, dayCount, photoCount, futureDays: days.futureDays, skipped };
+    return { ok: true, entries: days.entries, dayCount, photoCount, futureDays: days.futureDays, skipped, dailyGoal };
   }
 
   /**

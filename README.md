@@ -8,10 +8,6 @@ history, and keep progress photos. No account, no sign-up: everything
 stays on the device. The badge shows the latest test run (Chromium and
 WebKit) on the published branch.
 
-Free Calorie Counter is the installable phone app only. An optional server version
-(`server.js`) used to exist alongside it; the owner retired it, and it has
-been removed along with its tests and documentation.
-
 - [Use it on your phone](#use-it-on-your-phone)
 - [Rules at a glance](#rules-at-a-glance)
 - [Your data and backups](#your-data-and-backups)
@@ -43,6 +39,7 @@ backup). [REFERENCE.md](REFERENCE.md#screens) describes each.
 |---|---|
 | Calories per meal | whole numbers, 0 to 10,000 |
 | Weight | 50 to 1,000 lbs, at most two decimal places |
+| Daily calorie goal | optional, whole number, 500 to 10,000 |
 | Days that can be logged | today and earlier |
 | Averages | leave out today; calories count only days with meals |
 | Units and language | pounds, US English only |

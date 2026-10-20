@@ -141,7 +141,7 @@ export function buildWeightField(view) {
   const status = createFieldStatus(input);
   // How it saves, said before anything is typed; a status (Saving…, Saved,
   // an error) shows in its place while there is one.
-  const hint = h('p', { class: 'field-hint', id: uid('weight-hint'), text: 'Saves when you leave the box' });
+  const hint = h('p', { class: 'field-hint', id: uid('weight-hint'), text: 'Pounds only. Saves when you leave the box' });
   input.setAttribute('aria-describedby', `${status.el.id} ${hint.id}`);
   const saver = weightSaver(view, input, status);
 

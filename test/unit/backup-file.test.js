@@ -122,10 +122,6 @@ test('checking a backup reports problems without importing anything', async () =
   const notOurs = await checkBackup(new Blob([JSON.stringify({ app: 'other', entries: {} })]));
   assert.equal(notOurs.ok, false);
 
-  // Backups made before the app was renamed still import.
-  const legacy = await checkBackup(new Blob([JSON.stringify({ app: atob('a2VubmE='), version: 2, entries: { '2025-05-01': { date: '2025-05-01', weight: 150, meals: {} } } })]));
-  assert.equal(legacy.ok, true);
-
   const v1 = await checkBackup(new Blob([JSON.stringify({ exportedAt: 'x', entries: { '2025-05-01': { date: '2025-05-01', weight: 150, meals: {} } } }, null, 2)]));
   assert.equal(v1.ok, true);
   assert.equal(v1.photoCount, 0);

@@ -15,6 +15,7 @@ import { buildHistory } from './ui/screen-history.js';
 import { buildCompare } from './ui/screen-compare.js';
 import { buildPhotos } from './ui/screen-photos.js';
 import { buildSettings } from './ui/screen-settings.js';
+import { buildAdmin } from './ui/screen-admin.js';
 import { recordProblem, recordUncaughtErrors } from './ui/problems.js';
 import { showWhatsNewOnce } from './ui/whats-new.js';
 
@@ -25,6 +26,7 @@ registerScreens({
   compare: buildCompare,
   photos: buildPhotos,
   settings: buildSettings,
+  admin: buildAdmin,
 });
 
 // If the app is left open (or resumed) past midnight, Today moves to the

@@ -16,11 +16,8 @@ const { validateIncomingEntry } = require('./input.js');
 // Version-1 files (entries only, no "app"/"version") still import.
 
 const BACKUP_VERSION = 2;
-// What backups made by this app say they are. Backups made before the app
-// was renamed carry its earlier id, kept encoded so the old name isn't
-// written out here; those still import.
+// What backups made by this app say they are.
 const BACKUP_APP_ID = 'free-calorie-counter';
-const LEGACY_APP_ID = atob('a2VubmE=');
 const MAX_BACKUP_ISSUES_SHOWN = 1;
 
 // A day as a backup file holds it. The first version of Free Calorie Counter stored a
@@ -55,7 +52,7 @@ function checkBackupDays(payload, skipped, latestDay) {
   if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
     return { ok: false, error: "This file isn't a Free Calorie Counter backup." };
   }
-  if (payload.app !== undefined && payload.app !== BACKUP_APP_ID && payload.app !== LEGACY_APP_ID) {
+  if (payload.app !== undefined && payload.app !== BACKUP_APP_ID) {
     return { ok: false, error: "This file isn't a Free Calorie Counter backup." };
   }
   if (typeof payload.version === 'number' && payload.version > BACKUP_VERSION) {
@@ -212,7 +209,6 @@ function backupReminderDue({ hasData, lastBackupAt, snoozedUntil, now }) {
 module.exports = {
   BACKUP_VERSION,
   BACKUP_APP_ID,
-  LEGACY_APP_ID,
   entryForBackup,
   photoKey,
   checkBackupDays,

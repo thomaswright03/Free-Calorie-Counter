@@ -619,76 +619,8 @@
 
     async function init() {
       if (!storageWorks()) return { ok: false, reason: 'blocked' };
-      await migrateLegacy();
       readRaw(); // surfaces any recovery notice straight away
       return { ok: true };
-    }
-
-    // The app used to keep its data under its earlier name. The first time
-    // this version opens, it copies those days, settings and photos across
-    // (never overwriting anything already here, and leaving the old copies
-    // untouched). If anything fails it tries again on the next open.
-    const MIGRATED_KEY = 'fcc:migrated';
-    async function migrateLegacy() {
-      try {
-        if (storage.getItem(MIGRATED_KEY) !== null) return;
-        const prefix = `${core.LEGACY_APP_ID}:`;
-        /** @type {string[]} */
-        const keys = [];
-        for (let i = 0; i < storage.length; i++) {
-          const key = storage.key(i);
-          if (key && key.startsWith(prefix)) keys.push(key);
-        }
-        for (const key of keys) {
-          const next = `fcc:${key.slice(prefix.length)}`;
-          const value = storage.getItem(key);
-          if (value !== null && storage.getItem(next) === null) storage.setItem(next, value);
-        }
-        await migrateLegacyPhotos();
-        storage.setItem(MIGRATED_KEY, new Date().toISOString());
-      } catch {
-        // Left for the next open.
-      }
-    }
-
-    async function migrateLegacyPhotos() {
-      if (!idb || typeof idb.databases !== 'function') return;
-      const legacyName = `${core.LEGACY_APP_ID}-photos`;
-      const factory = idb;
-      if (!(await factory.databases()).some((d) => d.name === legacyName)) return;
-      /** @type {IDBDatabase} */
-      const legacy = await new Promise((resolve, reject) => {
-        const req = factory.open(legacyName);
-        req.onsuccess = () => resolve(req.result);
-        req.onerror = () => reject(req.error);
-      });
-      try {
-        if (!legacy.objectStoreNames.contains(PHOTOS_STORE)) return;
-        /** @type {any[]} */
-        const records = await new Promise((resolve, reject) => {
-          const req = legacy.transaction([PHOTOS_STORE], 'readonly').objectStore(PHOTOS_STORE).getAll();
-          req.onsuccess = () => resolve(req.result);
-          req.onerror = () => reject(req.error);
-        });
-        if (!records.length) return;
-        const db = await openPhotosDB();
-        await new Promise((resolve, reject) => {
-          const t = db.transaction([PHOTOS_STORE], 'readwrite');
-          const store = t.objectStore(PHOTOS_STORE);
-          for (const r of records) {
-            const req = store.add(r);
-            // Already copied on an earlier, interrupted try: keep that one.
-            req.onerror = (e) => {
-              e.preventDefault();
-              e.stopPropagation();
-            };
-          }
-          t.oncomplete = () => resolve(undefined);
-          t.onerror = () => reject(t.error);
-        });
-      } finally {
-        legacy.close();
-      }
     }
 
     // Asks the browser not to evict Free Calorie Counter's data under storage pressure.

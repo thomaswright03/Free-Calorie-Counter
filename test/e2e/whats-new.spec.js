@@ -50,7 +50,7 @@ async function expectStop(page, name, target) {
 test('opens once for someone who had logged days, and lights up each new feature on its own screen', async ({ page, appURL }) => {
   await returningUser(page, appURL);
   await expect(tour(page)).toBeVisible();
-  await expectStop(page, 'What’s new in Free Calorie Counter', null);
+  await expectStop(page, 'Quick tour of Free Calorie Counter', null);
   await expect(tour(page).getByText(`1 of ${STOPS}`)).toBeVisible();
   await expect(tour(page).getByRole('button', { name: 'Back' })).toBeDisabled();
 
@@ -173,7 +173,7 @@ test('Settings starts it again and it ends back on Settings; axe finds no proble
   await expect(tour(page)).toHaveCount(0);
   await page.goto(`${appURL}/#/settings`);
   await page.getByRole('button', { name: 'Take the tour' }).click();
-  await expect(tour(page).getByRole('heading', { name: 'What’s new in Free Calorie Counter' })).toBeFocused();
+  await expect(tour(page).getByRole('heading', { name: 'Quick tour of Free Calorie Counter' })).toBeFocused();
   await tour(page).getByRole('button', { name: 'Next' }).click();
   await expect(page).toHaveURL(/#\/$/);
   await expectStop(page, 'View or fix any past day', page.locator('main .day-switch, main .field:has(input[type="date"])').first());
@@ -194,7 +194,7 @@ for (const size of [
   test(`every stop fits a ${size.width}×${size.height} screen, card beside the lit feature`, async ({ page, appURL }) => {
     await page.setViewportSize(size);
     await returningUser(page, appURL);
-    await expectStop(page, 'What’s new in Free Calorie Counter', null);
+    await expectStop(page, 'Quick tour of Free Calorie Counter', null);
     for (let i = 1; i < STOPS; i += 1) {
       await tour(page).getByRole('button', { name: 'Next' }).click();
       await expect(tour(page).getByText(`${i + 1} of ${STOPS}`)).toBeVisible();

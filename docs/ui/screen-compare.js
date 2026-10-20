@@ -2,6 +2,7 @@
 // top answers that in two sentences, calories and weight; each meal's
 // numbers are one tap further down; then the 7-day trend charts.
 
+import { getGoal } from './goal.js';
 import { core, h, MEAL_STEPS, today, mealLabel } from './dom.js';
 import { store } from './store.js';
 import { buildChartsCard } from './charts.js';
@@ -142,6 +143,9 @@ function calorieBarRows(t, y, same, usual, averageDay) {
 function calorieAnswer(t, y, avg, earlier) {
   const details = [];
   if (t.total !== null) details.push(`${cal(t.total)} so far`);
+  const goal = getGoal();
+  const progress = core.goalProgress(t.total, goal);
+  if (goal !== null) details.push(progress ? `daily goal ${cal(goal)}, ${progress.text}` : `daily goal ${cal(goal)}`);
   if (avg.total !== null) details.push(`average day ${cal(avg.total)}`);
   if (y.total !== null) details.push(`yesterday ${cal(y.total)}`);
   else if (earlier) details.push('no meals logged yesterday');

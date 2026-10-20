@@ -469,6 +469,8 @@ input.visually-hidden:focus-visible + .file-btn { outline: 3px solid var(--focus
 }
 
 .total-label { color: var(--muted); font-size: var(--fs-sm); }
+.total-goal { margin-top: var(--s2); font-size: var(--fs-sm); font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
+.total-goal.is-over { color: var(--danger); }
 
 .meal-list { list-style: none; margin: 0; padding: 0; }
 
@@ -1137,3 +1139,15 @@ body.is-touring { padding-bottom: 100vh; }
   color: var(--muted);
   font-weight: 600;
 }
+
+/* ------------------------------------------------------------ status page and updates */
+
+.admin-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s3); }
+.update-list { margin: 0; padding-left: 1.25rem; display: grid; gap: var(--s2); font-size: var(--fs-sm); }
+.admin-times { color: var(--muted); font-size: var(--fs-sm); margin: 0; }
+.admin-json { overflow-x: auto; font-size: var(--fs-sm); }
+.admin-status { display: inline-block; padding: 0 var(--s2); border-radius: var(--r-md); font-weight: 700; font-size: var(--fs-sm); border: 1px solid currentColor; }
+.admin-status.is-ok { color: var(--accent-text); }
+.admin-status.is-warning { color: var(--warning-text); background: var(--warning-soft); border-color: var(--warning-border); }
+.admin-status.is-down { color: var(--danger); background: var(--danger-soft); }
+.admin-status.is-unknown { color: var(--muted); }

@@ -24,8 +24,8 @@ const buttonNamed = (text) => () => Array.from(byId('main').querySelectorAll('bu
 export const STOPS = [
   {
     where: 'Welcome',
-    title: 'What’s new in Free Calorie Counter',
-    points: ['Free Calorie Counter has had a big update. This quick tour shows you each new feature right where it is.', 'Tap Next to start, or Close to skip. You can take the tour again from Settings.'],
+    title: 'Quick tour of Free Calorie Counter',
+    points: ['This quick tour shows you the main parts of Free Calorie Counter right where they are.', 'Tap Next to start, or Close to skip. You can take the tour again from Settings.'],
   },
   {
     where: 'Today',
