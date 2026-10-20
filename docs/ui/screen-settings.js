@@ -2,12 +2,14 @@
 
 import { core, h, uid, prefs, today } from './dom.js';
 import { failureText, recordProblem, buildProblemLogCard } from './problems.js';
-import { confirmDialog, createStatusLine } from './feedback.js';
+import { confirmDialog, createStatusLine, createFieldStatus } from './feedback.js';
 import { store } from './store.js';
 import { applyTheme } from './theme.js';
 import { buildBackupSection, downloadBlob } from './backup.js';
 import { inAppleBrowserTab, runningInstalled, installSteps } from './install-note.js';
 import { showWhatsNew } from './whats-new.js';
+import { LATEST_UPDATE } from './latest-update.js';
+import { getGoal, setGoal } from './goal.js';
 
 /** @type {import('./render.js').ScreenBuilder} */
 export async function buildSettings() {
@@ -43,17 +45,61 @@ export async function buildSettings() {
   const whatsNew = h(
     'section',
     { class: 'card' },
-    h('h3', { class: 'section-title', text: 'What’s new' }),
-    h('p', { class: 'card-sub', text: 'A quick guided tour of what Free Calorie Counter’s latest update added, shown right where each feature is.' }),
+    h('h3', { class: 'section-title', text: 'Quick tour' }),
+    h('p', { class: 'card-sub', text: 'A quick guided tour of Free Calorie Counter, shown right where each feature is.' }),
     h('button', { type: 'button', class: 'btn btn-secondary', text: 'Take the tour', onClick: () => showWhatsNew() })
   );
 
+  const latest = buildLatestUpdate();
   const storageCard = await buildYourDataCard();
   const damaged = await buildDamagedDataCard();
   return {
     title: 'Settings',
-    root: h('div', { class: 'screen-stack two-col' }, h('div', { class: 'screen-stack' }, appearance, buildBackupSection(), whatsNew), h('div', { class: 'screen-stack' }, damaged, storageCard, buildProblemLogCard(downloadBlob))),
+    root: h('div', { class: 'screen-stack two-col' }, h('div', { class: 'screen-stack' }, appearance, buildGoalCard(), buildBackupSection(), whatsNew), h('div', { class: 'screen-stack' }, latest, damaged, storageCard, buildProblemLogCard(downloadBlob))),
   };
+}
+
+/** The daily calorie goal: a whole number, or empty for none. */
+function buildGoalCard() {
+  const input = h('input', { type: 'text', inputmode: 'numeric', id: uid('goal'), autocomplete: 'off', placeholder: 'No goal set' });
+  const current = getGoal();
+  input.value = current === null ? '' : String(current);
+  const status = createFieldStatus(input);
+  const save = () => {
+    const result = core.validateGoal(input.value);
+    if (!result.ok) {
+      status.set('error', result.error);
+      return;
+    }
+    setGoal(result.value);
+    input.value = result.value === null ? '' : String(result.value);
+    status.set('saved', result.value === null ? 'Goal cleared' : `Goal saved: ${core.formatNumber(result.value)} calories a day`);
+  };
+  input.addEventListener('change', save);
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') save();
+  });
+  return h(
+    'section',
+    { class: 'card', 'data-goal-card': '' },
+    h('h3', { class: 'section-title', text: 'Daily calorie goal' }),
+    h('p', { class: 'card-sub', text: `Today, History and Compare show each day against it. A whole number from ${core.formatNumber(core.GOAL_LIMITS.min)} to ${core.formatNumber(core.GOAL_LIMITS.max)}; leave empty for no goal.` }),
+    h('div', { class: 'field' }, h('label', { for: input.id, text: 'Calories per day' }), input, status.el)
+  );
+}
+
+/** What the latest round of changes did (see latest-update.js). */
+function buildLatestUpdate() {
+  return h(
+    'section',
+    { class: 'card', 'data-latest-update': '' },
+    h('h3', { class: 'section-title', text: 'Latest Update' }),
+    h('p', { class: 'card-sub', text: LATEST_UPDATE.date }),
+    h('h4', { class: 'section-title', text: 'Frontend changes' }),
+    h('ul', { class: 'update-list' }, LATEST_UPDATE.frontend.map((t) => h('li', { text: t }))),
+    h('h4', { class: 'section-title', text: 'Summary' }),
+    h('p', { class: 'card-sub', text: LATEST_UPDATE.summary })
+  );
 }
 
 /**
@@ -91,6 +137,7 @@ async function buildYourDataCard() {
   } else if (runningInstalled()) {
     storageCard.append(h('p', { class: 'card-sub', text: 'Free Calorie Counter is running from your Home Screen, so this doesn’t apply.' }));
   }
+  storageCard.append(h('p', { class: 'card-sub' }, h('a', { class: 'btn-text', href: '#/admin', text: 'App status' })));
   const persisted = await store.persistenceStatus();
   if (persisted === true) {
     storageCard.append(h('p', { class: 'card-sub', text: 'This browser has agreed to keep Free Calorie Counter’s data even when the device is low on space.' }));

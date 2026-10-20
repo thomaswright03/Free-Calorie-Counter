@@ -6,6 +6,7 @@ import { core, h, today, plural, formatBytes } from './dom.js';
 import { failureText } from './problems.js';
 import { confirmDialog, itemList, createStatusLine } from './feedback.js';
 import { store } from './store.js';
+import { setGoal } from './goal.js';
 
 /**
  * The parts of Settings' backup card that import uses.
@@ -18,7 +19,7 @@ import { store } from './store.js';
  */
 
 /**
- * @typedef {{ ok: true, entries: Record<string, import('../core.js').Entry>, dayCount: number, photoCount: number, futureDays: number, skipped: string[] }} CheckedBackup
+ * @typedef {{ ok: true, entries: Record<string, import('../core.js').Entry>, dayCount: number, photoCount: number, futureDays: number, skipped: string[], dailyGoal: number | null }} CheckedBackup
  * @typedef {{ days: number, daysReplaced: boolean, unchangedDays: number, photos: import('../store-local.js').Photo[], alreadyHere: number, futurePhotos: number }} Restored
  */
 
@@ -92,6 +93,7 @@ async function confirmRestore(file, checked) {
  * @param {Restored} done
  */
 async function restore(file, checked, ui, done) {
+  if (checked.dailyGoal !== null) setGoal(checked.dailyGoal);
   if (checked.dayCount > 0) {
     ui.status.set('pending', 'Restoring days…');
     // Only days that are new or different are written; a day already here

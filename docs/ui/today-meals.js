@@ -3,6 +3,7 @@
 // Undo button in its row while the screen is open, and if the screen is
 // left soon after, the next screen offers Undo for a few seconds more.
 
+import { showGoalLine } from './goal.js';
 import { core, h, MEAL_STEPS, mealLabel, today, notSavedReason } from './dom.js';
 import { failureText } from './problems.js';
 import { toast, announce } from './feedback.js';
@@ -54,6 +55,7 @@ async function putBackElsewhere(key, r) {
 export function buildMealList(view, where) {
   const totalNum = h('div', { class: 'total-num' });
   const totalLabel = h('div', { class: 'total-label' });
+  const totalGoal = h('div', { class: 'total-goal', 'data-goal-progress': '' });
   const list = h('ul', { class: 'meal-list', 'aria-label': 'Meals' });
   /** Meals removed on this screen, not put back. @type {Map<string, Removed>} */
   const removed = new Map();
@@ -64,6 +66,7 @@ export function buildMealList(view, where) {
     const when = where.isToday ? 'today' : core.formatDate(view.date, today());
     totalLabel.textContent =
       total === null ? `No meals logged ${where.isToday ? 'yet today' : `for ${when}`}` : `calories logged ${where.isToday ? 'today' : `on ${when}`}`;
+    showGoalLine(totalGoal, total);
   }
 
   /** @param {string} key @param {string} selector */
@@ -139,7 +142,7 @@ export function buildMealList(view, where) {
     removed.clear();
   }
 
-  return { total: h('div', { class: 'total-box' }, totalNum, totalLabel), list, refresh, offerUndoAfterLeaving };
+  return { total: h('div', { class: 'total-box' }, totalNum, totalLabel, totalGoal), list, refresh, offerUndoAfterLeaving };
 }
 
 /**

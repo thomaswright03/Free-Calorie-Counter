@@ -32,6 +32,7 @@ const stats = require('./core/stats.js');
 const input = require('./core/input.js');
 const backup = require('./core/backup-format.js');
 const charts = require('./core/charts.js');
+const goal = require('./core/goal.js');
 const photos = require('./core/photos.js');
 const problems = require('./core/problems.js');
 
@@ -47,7 +48,6 @@ module.exports = Object.freeze({
   LIMITS: input.LIMITS,
   BACKUP_VERSION: backup.BACKUP_VERSION,
   BACKUP_APP_ID: backup.BACKUP_APP_ID,
-  LEGACY_APP_ID: backup.LEGACY_APP_ID,
   BACKUP_REMINDER: backup.BACKUP_REMINDER,
   IMAGE_EXTENSIONS: photos.IMAGE_EXTENSIONS,
   todayStr: dates.todayStr,
@@ -84,6 +84,10 @@ module.exports = Object.freeze({
   settledSeries: stats.settledSeries,
   trendSeries: stats.trendSeries,
   computeMonthAverages: stats.computeMonthAverages,
+  GOAL_LIMITS: goal.GOAL_LIMITS,
+  validateGoal: goal.validateGoal,
+  goalFromData: goal.goalFromData,
+  goalProgress: goal.goalProgress,
   validateCalories: input.validateCalories,
   validateWeight: input.validateWeight,
   validateCaloriesValue: input.validateCaloriesValue,

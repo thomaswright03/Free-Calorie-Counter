@@ -2,13 +2,13 @@
 // app and a refresh stays put:
 //   #/                 today          #/day/2026-09-21        a past day
 //   #/log[/meal]       log today      #/day/2026-09-21/log    log a past day
-//   #/history  #/compare  #/photos  #/settings
+//   #/history  #/compare  #/photos  #/settings  #/admin
 
 import { core, today } from './dom.js';
 import { toast, clearToastsOnNavigation } from './feedback.js';
 
 /**
- * @typedef {'today' | 'log' | 'history' | 'compare' | 'photos' | 'settings'} ScreenName
+ * @typedef {'today' | 'log' | 'history' | 'compare' | 'photos' | 'settings' | 'admin'} ScreenName
  * @typedef {{ screen: ScreenName, date: string | null, meal?: string | null, future?: boolean, noSuchDate?: boolean }} Route
  *   future: the address named a day after today; noSuchDate: it named a date that doesn't exist (Feb 30)
  */
@@ -16,7 +16,7 @@ import { toast, clearToastsOnNavigation } from './feedback.js';
 const NO_SUCH_DATE = "That date doesn't exist, so Today is shown.";
 
 /** @type {ScreenName[]} */
-const SCREENS = ['history', 'compare', 'photos', 'settings'];
+const SCREENS = ['history', 'compare', 'photos', 'settings', 'admin'];
 
 /**
  * @param {string} hash

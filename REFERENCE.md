@@ -89,8 +89,8 @@ run, test and release it.
 - **Settings** (top right, the gear with the word Settings) has the light/dark theme (or follow the system),
   backup export and import, where your data is stored, and the **Problem
   log** (see [Where your data lives](#where-your-data-lives-and-backups)),
-  and **What's new → Take the tour**: a guided tour of what the latest
-  update added. It moves through the screens, lights up each new feature
+  a **Daily calorie goal** box (whole number, 500 to 10,000, empty for none; Today shows "of 2,000 goal · 500 left", History and Compare show each day against it, and it is saved in backups), a **Latest Update** card (date, Frontend changes, summary; kept in `docs/ui/latest-update.js` and checked by a unit test), and **Quick tour → Take the tour**: a guided tour of
+  Free Calorie Counter. It moves through the screens, lights up each new feature
   (the day picker, the meal rows, Log Meal, the Weight box, the graph range,
   the backup reminder, History's months, Compare's answers, Add Photo, Export
   Backup) and explains it in a card beside it, then returns to where it
@@ -301,6 +301,38 @@ phone short of memory would). The finished backup file itself is held by
 the browser until it is saved. Import checks the whole file first, then
 adds the days and the photos; if it is interrupted part-way, importing the
 same file again adds only the photos that are still missing.
+
+## Status page (`#/admin`)
+
+`#/admin` (also reachable as `/admin/`, which redirects to it, and from
+Settings → App status) runs real checks on the device each time it opens and
+shows an overall status and three groups. Nothing is hard-coded; a failed
+check shows **Down**.
+
+- **Important:** meal and weight saving (a write, read-back and delete of a
+  test key), the photo store opening, and a backup file being buildable.
+- **Key:** the offline cache (service worker registered and a cache named
+  like the `CACHE_NAME` in `sw.js` present), time since the last confirmed
+  backup (Warning after 7 days), and the recorded problem-log count.
+- **Basic:** localStorage, IndexedDB, storage persistence, the build id (the
+  cache name) and the Latest Update date.
+
+The page shows the same data as JSON (`product`, `checked_at`, `overall`,
+`functions[]` with `tier`, `name`, `status`, `last_checked`, `last_success`,
+`next_expected_run`, `detail`). `last_success` is remembered on the device.
+
+**`/admin/status.json` is a documented exception.** The app is a static site
+with no server, and all data is on each user's own device, so there is no
+central place that can know whether "the app" works for a given person. The
+JSON is therefore shown in the page rather than served at a URL. Awaiting
+the owner's approval of this exception, or a decision to publish a
+CI-generated build and test-status file instead.
+
+## Backup file
+
+`{ app: "free-calorie-counter", version: 2, exportedAt, settings: { dailyGoal }, entries, photos }`.
+`settings` is optional on import (older files have none), and a goal outside
+500 to 10,000 is ignored.
 
 ## Development details
 

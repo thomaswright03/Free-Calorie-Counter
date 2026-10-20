@@ -3,6 +3,7 @@
 // request (or by jumping to a month), so years of data stay quick to open
 // and to find your way around.
 
+import { goalText } from './goal.js';
 import { core, h, uid, today, visibleEntries, plural } from './dom.js';
 import { store } from './store.js';
 import { dayHash } from './router.js';
@@ -86,6 +87,8 @@ function returnToPlace(root, place) {
 function dayRow(e, now) {
   const total = core.totalCalories(e.meals);
   const parts = [total === null ? 'No meals logged' : core.formatCalories(total)];
+  const progress = goalText(e.meals);
+  if (progress) parts.push(progress.text);
   if (e.weight !== null) parts.push(core.formatWeight(e.weight));
   return h(
     'li',
