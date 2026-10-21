@@ -24,7 +24,7 @@ IndexedDB on the user's device. No account, server, ads or analytics.
 WebKit job runs in CI only. Rebuild with `npm run build` after editing `docs/` (commits include `docs/build`).
 
 ## Open / next
-- Real-iPhone run of RELEASE-CHECKLIST.md (Thomas); Record table is empty.
-- Lawyer review of health data; operator/contact for privacy notice and terms (Thomas).
-- Thomas to approve the `/admin/status.json` exception (or ask for a CI-generated file).
+- Real-iPhone run of RELEASE-CHECKLIST.md: done 2026-10-21 on iPhone 14, iOS 18.7.2, all passed (row in the Record table).
+- Lawyer review: done and approved per the owner (2026-10-20); the owner says reviewer name and date are not needed (2026-10-21), so don't ask again. Contact email set; operator set to Wright AI Solutions (confirmed by the owner, 2026-10-21).
+- `/admin/status.json` exception: approved by Thomas 2026-10-21 (REFERENCE.md).
 - Optional: kg setting.

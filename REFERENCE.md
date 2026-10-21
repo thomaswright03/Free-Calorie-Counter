@@ -324,9 +324,8 @@ The page shows the same data as JSON (`product`, `checked_at`, `overall`,
 **`/admin/status.json` is a documented exception.** The app is a static site
 with no server, and all data is on each user's own device, so there is no
 central place that can know whether "the app" works for a given person. The
-JSON is therefore shown in the page rather than served at a URL. Awaiting
-the owner's approval of this exception, or a decision to publish a
-CI-generated build and test-status file instead.
+JSON is therefore shown in the page rather than served at a URL. The owner
+approved this exception on 2026-10-21.
 
 ## Backup file
 
@@ -386,3 +385,15 @@ the published branch: whatever is in its `docs/` folder is the live app.
 Other branches are not published until they are merged into it.
 Pages serves the files in `docs/` as they are, which is why the built files
 in `docs/build/` are committed (see above).
+
+## Legal
+
+- Privacy policy `docs/privacy.html` and terms `docs/terms.html`, linked
+  from Settings → Free and private. No cookies are set and browser storage
+  is strictly necessary, so there is no cookie banner.
+- Operator named on both pages: Wright AI Solutions. Terms are governed by Arizona law (owner, 2026-10-21).
+- Contact for both: thomas@wrightaisolutions.com (given by the owner,
+  2026-10-20).
+- Lawyer review: done. The owner reported on 2026-10-20 that a lawyer
+  reviewed the app (health data) and said it is good to go. The owner
+  decided the reviewer's name and the review date don't need recording.
