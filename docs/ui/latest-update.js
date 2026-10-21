@@ -3,7 +3,7 @@
 // than the newest commit that touched docs/.
 
 export const LATEST_UPDATE = {
-  date: '2026-10-20',
+  date: '2026-10-21',
   summary:
     'You can now set a daily calorie goal and see how much of it is left. There is a Status page that checks the app is working on this device, the tour is now called the Quick tour, the weight box says pounds only, and the app no longer carries code for an older private app. The apple trend icon and favicon arrived in the round before.',
   /** What you can see in the app, listed first. */
@@ -17,6 +17,7 @@ export const LATEST_UPDATE = {
     'The weight box says “Pounds only”.',
     'The app icon and browser tab icon are the new apple trend logo.',
     'Settings → Free and private links to the new Privacy policy and Terms of service.',
+    'The Privacy policy and Terms now name Wright AI Solutions as who runs the app, with thomas@wrightaisolutions.com as the contact.',
     'Tapping Log Meal right after typing your weight works on the first tap again (the button no longer shifts when the weight saves).',
   ],
 };
