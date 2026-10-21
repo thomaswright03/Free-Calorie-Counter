@@ -324,9 +324,8 @@ The page shows the same data as JSON (`product`, `checked_at`, `overall`,
 **`/admin/status.json` is a documented exception.** The app is a static site
 with no server, and all data is on each user's own device, so there is no
 central place that can know whether "the app" works for a given person. The
-JSON is therefore shown in the page rather than served at a URL. Awaiting
-the owner's approval of this exception, or a decision to publish a
-CI-generated build and test-status file instead.
+JSON is therefore shown in the page rather than served at a URL. The owner
+approved this exception on 2026-10-21.
 
 ## Backup file
 
