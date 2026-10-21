@@ -17,7 +17,7 @@ export const LATEST_UPDATE = {
     'The weight box says “Pounds only”.',
     'The app icon and browser tab icon are the new apple trend logo.',
     'Settings → Free and private links to the new Privacy policy and Terms of service.',
-    'The Privacy policy and Terms now name Wright AI Solutions as who runs the app, with thomas@wrightaisolutions.com as the contact.',
+    'The Privacy policy and Terms now name Wright AI Solutions as who runs the app, with thomas@wrightaisolutions.com as the contact. The Terms are governed by Arizona law.',
     'Tapping Log Meal right after typing your weight works on the first tap again (the button no longer shifts when the weight saves).',
   ],
 };
