@@ -324,8 +324,10 @@ The page shows the same data as JSON (`product`, `checked_at`, `overall`,
 **`/admin/status.json` is a documented exception.** The app is a static site
 with no server, and all data is on each user's own device, so there is no
 central place that can know whether "the app" works for a given person. The
-JSON is therefore shown in the page rather than served at a URL. The owner
-approved this exception on 2026-10-21.
+JSON is therefore shown in the page rather than served at a URL, so the
+live `/admin/status.json` returning 404 is expected.
+
+**Approved:** the owner approved this exception on 2026-10-21 (01:24 UTC).
 
 ## Backup file
 
@@ -371,18 +373,26 @@ the unit tests alone.
 
 GitHub Actions (`.github/workflows/test.yml`) runs on every push and pull
 request, as two checks: **Tests / test** (lint, type check, unit tests,
-Chromium) and **Tests / webkit**. GitHub only blocks merging a failing
+Chromium) and **Tests / webkit**. On a push to `main` a third job,
+**Tests / deploy**, needs both and only then publishes `docs/` to Pages. GitHub only blocks merging a failing
 change once branch protection is on: in **Settings → Branches**, add a rule
 for the published branch (see [Where the app is published](#where-the-app-is-published)), tick *Require status checks to pass
 before merging*, and select both checks.
 
 ### Where the app is published
 
-Pages is configured in the repository's **Settings → Pages**: *Source:
-Deploy from a branch*, branch **`main`**,
-folder **`/docs`**. That branch (also the repository's default branch) is
-the published branch: whatever is in its `docs/` folder is the live app.
-Other branches are not published until they are merged into it.
+The published branch is **`main`** (also the repository's default
+branch): whatever is in its `docs/` folder is the live app. Other branches
+are not published until they are merged into it.
+
+Pages is set in the repository's **Settings → Pages**. The intended
+setting is *Source: GitHub Actions*: the **Tests / deploy** job then
+uploads `docs/` and deploys it only after **Tests / test** and
+**Tests / webkit** pass, so a change whose tests fail or are still running
+never goes live. The job reads the Pages source first; while it is still
+*Deploy from a branch* (`main`, `/docs`), it logs a notice and stops, and
+GitHub deploys from the branch straight away as before. Switching the
+source is all it takes; nothing in the repository changes.
 Pages serves the files in `docs/` as they are, which is why the built files
 in `docs/build/` are committed (see above).
 

@@ -59,6 +59,12 @@ test('an unknown page on the site shows Free Calorie Counter’s “Page not fou
     const bg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
     expect(bg).toBe(scheme === 'light' ? 'rgb(241, 245, 249)' : 'rgb(15, 23, 42)');
   }
+  // The icon links point at the app's own files from any depth.
+  const icon = await page.locator('link[rel="icon"]').evaluate((l) => l.href);
+  expect(icon).toBe(`${appURL}/favicon.svg`);
+  expect((await page.request.get(icon)).status()).toBe(200);
+  const touch = await page.locator('link[rel="apple-touch-icon"]').evaluate((l) => l.href);
+  expect((await page.request.get(touch)).status()).toBe(200);
   await page.getByRole('link', { name: 'Open Free Calorie Counter' }).click();
   await expect(today(page)).toBeVisible();
 });

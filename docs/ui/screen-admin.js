@@ -31,8 +31,24 @@ async function run(tier, name, fn) {
   try {
     return { tier, name, ...(await fn()) };
   } catch (err) {
-    return { tier, name, status: 'down', detail: `Check failed: ${err instanceof Error && err.name ? err.name : 'error'}.` };
+    return { tier, name, status: 'down', detail: failedDetail(err) };
   }
+}
+
+/**
+ * A plain sentence for a check that threw, with the browser's own reason
+ * when it gives one.
+ * @param {unknown} err
+ */
+export function failedDetail(err) {
+  const reason = err instanceof Error ? err.message.trim().replace(/\.$/, '') : '';
+  return reason ? `This check couldn’t run on this device. The browser said: ${reason}.` : 'This check couldn’t run on this device.';
+}
+
+/** A time on this device's clock, with its time zone, like "Oct 21, 2026, 7:15 AM PDT". */
+export function formatCheckTime(/** @type {string | null} */ iso) {
+  if (!iso) return 'never';
+  return new Date(iso).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
 }
 
 function localStorageWorks() {
@@ -144,7 +160,6 @@ export async function buildAdmin() {
   const status = overall(rows);
   const json = { product: 'Free Calorie Counter', checked_at: now, overall: status, functions: rows };
   const badge = (/** @type {Status} */ s) => h('span', { class: `admin-status is-${s}`, text: LABELS[s] });
-  const when = (/** @type {string | null} */ t) => (t ? new Date(t).toLocaleString() : 'never');
 
   const groups = TIERS.map((tier) =>
     h(
@@ -162,7 +177,7 @@ export async function buildAdmin() {
               { class: 'admin-row', 'data-check': r.name },
               h('div', { class: 'admin-name' }, h('strong', { text: r.name }), ' ', badge(r.status)),
               h('p', { class: 'card-sub', text: r.detail }),
-              h('p', { class: 'admin-times', text: `Last checked ${when(r.last_checked)} · last success ${when(r.last_success)}` })
+              h('p', { class: 'admin-times', text: `Last checked ${formatCheckTime(r.last_checked)} · last success ${formatCheckTime(r.last_success)}` })
             )
           )
       )
@@ -174,7 +189,7 @@ export async function buildAdmin() {
     { class: 'card' },
     h('h2', { class: 'card-title', text: 'Status' }),
     h('p', { class: 'admin-overall', 'data-overall': status }, 'Overall: ', badge(status)),
-    h('p', { class: 'card-sub', text: `Checked ${when(now)}. These checks run on this device each time this page opens; nothing is sent anywhere.` })
+    h('p', { class: 'card-sub', text: `Checked ${formatCheckTime(now)}. These checks run on this device each time this page opens; nothing is sent anywhere.` })
   );
   const raw = h('details', { class: 'card' }, h('summary', { text: 'Status as JSON' }), h('pre', { class: 'admin-json', text: JSON.stringify(json, null, 2) }));
   return { title: 'Status', root: h('div', { class: 'screen-stack' }, head, ...groups, raw) };

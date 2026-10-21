@@ -4,6 +4,9 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -51,3 +54,42 @@ jobs:
           name: playwright-report-webkit
           path: playwright-report/
           retention-days: 7
+
+  # Publishes docs/ to GitHub Pages, only after both test jobs pass on a
+  # push to main. It runs once Settings → Pages → Source is "GitHub
+  # Actions"; while Pages still deploys from the branch it says so and
+  # stops, and the branch deploy keeps the site live.
+  deploy:
+    needs: [test, webkit]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: source
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          build_type=$(gh api "repos/${{ github.repository }}/pages" --jq .build_type || echo unknown)
+          echo "build_type=$build_type" >> "$GITHUB_OUTPUT"
+          if [ "$build_type" != "workflow" ]; then
+            echo "::notice::Pages source is '$build_type', not GitHub Actions, so this job doesn't deploy. Set Settings → Pages → Source to GitHub Actions to deploy only after the tests pass."
+          fi
+      - uses: actions/checkout@v4
+        if: steps.source.outputs.build_type == 'workflow'
+      - uses: actions/upload-pages-artifact@v3
+        if: steps.source.outputs.build_type == 'workflow'
+        with:
+          path: docs
+      - id: deployment
+        if: steps.source.outputs.build_type == 'workflow'
+        uses: actions/deploy-pages@v4

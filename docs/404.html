@@ -8,6 +8,8 @@
 <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)">
 <meta name="robots" content="noindex">
 <title>Page not found · Free Calorie Counter</title>
+<link rel="icon" id="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" id="touch-icon" href="icons/icon-180.png">
 <script>
   // The theme chosen in Free Calorie Counter's Settings, or the system's.
   (function () {
@@ -77,13 +79,15 @@
   <a class="btn" id="open-app" href="./">Open Free Calorie Counter</a>
 </main>
 <script>
-  // This page is shown for any missing address, however deep, so the link
-  // is worked out from where Free Calorie Counter lives: /<repository>/ on a GitHub Pages
+  // This page is shown for any missing address, however deep, so the links
+  // (the app and its icons) are worked out from where Free Calorie Counter lives: /<repository>/ on a GitHub Pages
   // project site (github.io), the site's root anywhere else.
   (function () {
     var first = location.pathname.split('/')[1];
     var base = /\.github\.io$/.test(location.hostname) && first ? '/' + first + '/' : '/';
     document.getElementById('open-app').setAttribute('href', base);
+    document.getElementById('icon').setAttribute('href', base + 'favicon.svg');
+    document.getElementById('touch-icon').setAttribute('href', base + 'icons/icon-180.png');
   })();
 </script>
 </body>

@@ -20,6 +20,22 @@ IndexedDB on the user's device. No account, server, ads or analytics.
 - Backup export check builds a test file from real days and reads it back (Down if not); Latest update folded into Build and version row.
 - Storage rows renamed in plain words; dates shown as "Oct 21, 2026"; Settings has its own App status card.
 
+## Fix round 3 (2026-10-21, after grade 85)
+- Pages deploy gated on tests: `deploy` job in `.github/workflows/test.yml` needs `test` and `webkit`, push to main only;
+  deploys once Settings → Pages → Source is GitHub Actions, until then logs a notice and the branch deploy continues.
+- Latest Update now replaces each round (summary and list for the latest round only, 6 items at most, unit test enforces).
+- Status page times show the device time zone ("Oct 21, 2026, 7:15 AM CDT"); a check that throws says
+  "This check couldn’t run on this device. The browser said: …" instead of the error's type name.
+- `docs/404.html` has favicon and apple-touch-icon links, resolved from the site base at any depth.
+
+## Owner items (the "Needs you" list): status on main
+- Operator and contact: DONE. Wright AI Solutions, thomas@wrightaisolutions.com, Arizona law, on
+  `docs/privacy.html` and `docs/terms.html` (PR #2, merged 2026-10-21).
+- Real-iPhone release checklist: DONE. Row dated 2026-10-21 in the RELEASE-CHECKLIST.md Record table
+  (iPhone 14, iOS 18.7.2, commit 44f4ed8, all passed), added in cadcd00, after 3597dcf.
+- `/admin/status.json` exception: APPROVED by the owner 2026-10-21 (REFERENCE.md, Status page section).
+- Branch protection on `main` and Pages source "GitHub Actions": repository settings only the owner can change.
+
 ## Decisions
 - Goal is a per-device pref (`fcc:dailyGoal`), not part of the entries blob.
 - Units stay US-only (lbs); kg support not built.
