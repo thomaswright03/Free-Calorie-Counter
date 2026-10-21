@@ -51,11 +51,18 @@ export async function buildSettings() {
   );
 
   const latest = buildLatestUpdate();
+  const statusCard = h(
+    'section',
+    { class: 'card', 'data-app-status': '' },
+    h('h3', { class: 'section-title', text: 'App status' }),
+    h('p', { class: 'card-sub', text: 'Check that saving, photos, backup and offline use are working on this device.' }),
+    h('a', { class: 'btn btn-secondary', href: '#/admin', text: 'Open App status' })
+  );
   const storageCard = await buildYourDataCard();
   const damaged = await buildDamagedDataCard();
   return {
     title: 'Settings',
-    root: h('div', { class: 'screen-stack two-col' }, h('div', { class: 'screen-stack' }, appearance, buildGoalCard(), buildBackupSection(), whatsNew), h('div', { class: 'screen-stack' }, latest, damaged, storageCard, buildProblemLogCard(downloadBlob))),
+    root: h('div', { class: 'screen-stack two-col' }, h('div', { class: 'screen-stack' }, appearance, buildGoalCard(), buildBackupSection(), whatsNew), h('div', { class: 'screen-stack' }, latest, statusCard, damaged, storageCard, buildProblemLogCard(downloadBlob))),
   };
 }
 
@@ -94,7 +101,7 @@ function buildLatestUpdate() {
     'section',
     { class: 'card', 'data-latest-update': '' },
     h('h3', { class: 'section-title', text: 'Latest Update' }),
-    h('p', { class: 'card-sub', text: LATEST_UPDATE.date }),
+    h('p', { class: 'card-sub', text: core.formatMonthDay(LATEST_UPDATE.date, true) }),
     h('h4', { class: 'section-title', text: 'Frontend changes' }),
     h('ul', { class: 'update-list' }, LATEST_UPDATE.frontend.map((t) => h('li', { text: t }))),
     h('h4', { class: 'section-title', text: 'Summary' }),
@@ -138,7 +145,6 @@ async function buildYourDataCard() {
   } else if (runningInstalled()) {
     storageCard.append(h('p', { class: 'card-sub', text: 'Free Calorie Counter is running from your Home Screen, so this doesn’t apply.' }));
   }
-  storageCard.append(h('p', { class: 'card-sub' }, h('a', { class: 'btn-text', href: '#/admin', text: 'App status' })));
   const persisted = await store.persistenceStatus();
   if (persisted === true) {
     storageCard.append(h('p', { class: 'card-sub', text: 'This browser has agreed to keep Free Calorie Counter’s data even when the device is low on space.' }));

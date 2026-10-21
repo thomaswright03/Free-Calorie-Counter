@@ -18,6 +18,7 @@ export const LATEST_UPDATE = {
     'The app icon and browser tab icon are the new apple trend logo.',
     'Settings → Free and private links to the new Privacy policy and Terms of service.',
     'The Privacy policy and Terms now name Wright AI Solutions as who runs the app, with thomas@wrightaisolutions.com as the contact. The Terms are governed by Arizona law.',
+    'Settings has its own App status card. The Status page now judges “Overall” by the Important checks only, checks a test backup of your real days, and uses plain names for the storage rows. Dates here read like “Oct 21, 2026”.',
     'Tapping Log Meal right after typing your weight works on the first tap again (the button no longer shifts when the weight saves).',
   ],
 };

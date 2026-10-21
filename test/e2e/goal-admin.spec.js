@@ -61,14 +61,46 @@ test('the goal goes into the backup file and comes back on restore; old backups 
 test('the status page runs real checks and groups them', async ({ page, appURL }) => {
   await page.goto(`${appURL}/#/admin`);
   await expect(page.getByRole('heading', { name: 'Status' })).toBeVisible();
-  for (const tier of ['Important', 'Key', 'Basic']) await expect(page.locator(`[data-admin-tier=${tier}]`)).toBeVisible();
-  await expect(page.locator('[data-overall]')).not.toHaveAttribute('data-overall', 'Down');
+  for (const tier of ['important', 'key', 'basic']) await expect(page.locator(`[data-admin-tier=${tier}]`)).toBeVisible();
+  await expect(page.locator('[data-overall]')).toHaveAttribute('data-overall', 'ok');
   await expect(page.locator('[data-check="Meal and weight saving"]')).toContainText('OK');
   await expect(page.locator('[data-check="Photo store"]')).toContainText('OK');
   const json = JSON.parse(await page.locator('.admin-json').textContent());
   expect(json.product).toBe('Free Calorie Counter');
-  expect(json.functions.length).toBeGreaterThanOrEqual(11);
+  expect(json.functions.length).toBeGreaterThanOrEqual(10);
   expect(json.functions[0]).toHaveProperty('last_success');
+  expect(json.overall).toBe('ok');
+  for (const f of json.functions) {
+    expect(f.tier).toMatch(/^(important|key|basic)$/);
+    expect(f.status).toMatch(/^(ok|warning|down|unknown)$/);
+  }
+});
+
+test('overall status comes from the Important rows only', async ({ page, appURL }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('fcc:problems', 'x');
+  });
+  await page.goto(`${appURL}/#/admin`);
+  await expect(page.locator('[data-check="Meal and weight saving"]')).toContainText('OK');
+  const json = JSON.parse(await page.locator('.admin-json').textContent());
+  const important = json.functions.filter((f) => f.tier === 'important');
+  const worst = ['down', 'warning', 'ok'].find((s) => important.some((f) => f.status === s));
+  expect(json.overall).toBe(worst);
+});
+
+test('Backup export shows Down when the saved days can’t be put in a backup', async ({ page, appURL, data }) => {
+  await data.seed({ [TODAY]: day(TODAY, { breakfast: 300 }) });
+  await page.addInitScript(() => {
+    const real = JSON.stringify;
+    JSON.stringify = (v, ...rest) => {
+      if (v && typeof v === 'object' && Object.keys(v).some((k) => /^\d{4}-\d{2}-\d{2}$/.test(k))) throw new TypeError('cannot serialise');
+      return real(v, ...rest);
+    };
+  });
+  await page.goto(`${appURL}/#/admin`);
+  await page.reload();
+  await expect(page.locator('[data-check="Backup export"]')).toContainText('Down');
+  await expect(page.locator('[data-overall]')).toHaveAttribute('data-overall', 'down');
 });
 
 test('blocked IndexedDB shows the photo store and the overall status as Down', async ({ page, appURL }) => {
@@ -77,8 +109,8 @@ test('blocked IndexedDB shows the photo store and the overall status as Down', a
   });
   await page.goto(`${appURL}/#/admin`);
   await expect(page.locator('[data-check="Photo store"]')).toContainText('Down');
-  await expect(page.locator('[data-check="IndexedDB available"]')).toContainText('Down');
-  await expect(page.locator('[data-overall]')).toHaveAttribute('data-overall', 'Down');
+  await expect(page.locator('[data-check="Browser storage for photos"]')).toContainText('Down');
+  await expect(page.locator('[data-overall]')).toHaveAttribute('data-overall', 'down');
 });
 
 test('Settings has a Latest Update card with the frontend changes first', async ({ page, appURL }) => {
@@ -89,4 +121,8 @@ test('Settings has a Latest Update card with the frontend changes first', async 
   const headings = await card.getByRole('heading').allTextContents();
   expect(headings).toEqual(['Latest Update', 'Frontend changes', 'Summary']);
   await expect(card).toContainText('apple trend logo');
+  await expect(card).toContainText(/[A-Z][a-z]{2} \d{1,2}, \d{4}/);
+  await expect(card).not.toContainText(/\d{4}-\d{2}-\d{2}/);
+  await page.locator('[data-app-status] a').click();
+  await expect(page).toHaveURL(/#\/admin/);
 });

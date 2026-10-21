@@ -1,22 +1,24 @@
 // Status page (#/admin): checks run on this device, right now, and are
 // shown as an overall status and three groups (Important, Key, Basic).
 // The same data is shown as JSON in the standard shape. Nothing here is
-// hard-coded: a check that fails shows Down.
+// hard-coded: a check that fails shows down.
 
-import { core, h, prefs } from './dom.js';
+import { core, h, prefs, visibleEntries } from './dom.js';
 import { store } from './store.js';
 import { problemLog } from './problems.js';
 import { lastBackup } from './backup.js';
 import { LATEST_UPDATE } from './latest-update.js';
 
 /**
- * @typedef {'OK' | 'Warning' | 'Down' | 'Unknown'} Status
- * @typedef {{ tier: 'Important' | 'Key' | 'Basic', name: string, status: Status, detail: string }} Check
+ * @typedef {'ok' | 'warning' | 'down' | 'unknown'} Status
+ * @typedef {{ tier: 'important' | 'key' | 'basic', name: string, status: Status, detail: string }} Check
  * @typedef {Check & { last_checked: string, last_success: string | null, next_expected_run: string | null }} Row
  */
 
-const TIERS = /** @type {const} */ (['Important', 'Key', 'Basic']);
+const TIERS = /** @type {const} */ (['important', 'key', 'basic']);
 const BACKUP_WARN_DAYS = 7;
+const LABELS = { ok: 'OK', warning: 'Warning', down: 'Down', unknown: 'Unknown' };
+const TIER_TITLES = { important: 'Important', key: 'Key', basic: 'Basic' };
 
 /**
  * Runs one check; a thrown error is a Down result, never a crash.
@@ -29,7 +31,7 @@ async function run(tier, name, fn) {
   try {
     return { tier, name, ...(await fn()) };
   } catch (err) {
-    return { tier, name, status: 'Down', detail: `Check failed: ${err instanceof Error && err.name ? err.name : 'error'}.` };
+    return { tier, name, status: 'down', detail: `Check failed: ${err instanceof Error && err.name ? err.name : 'error'}.` };
   }
 }
 
@@ -55,76 +57,83 @@ async function buildCacheName() {
 /** @returns {Promise<Check[]>} */
 function allChecks() {
   return Promise.all([
-    run('Important', 'Meal and weight saving', async () => {
-      if (!localStorageWorks()) return { status: 'Down', detail: 'Saved days can’t be written to or read back from this browser.' };
+    run('important', 'Meal and weight saving', async () => {
+      if (!localStorageWorks()) return { status: 'down', detail: 'Saved days can’t be written to or read back from this browser.' };
       const days = Object.keys(await store.loadEntries()).length;
-      return { status: 'OK', detail: `A test write and read-back worked. ${core.formatNumber(days)} saved day${days === 1 ? '' : 's'} read.` };
+      return { status: 'ok', detail: `A test write and read-back worked. ${core.formatNumber(days)} saved day${days === 1 ? '' : 's'} read.` };
     }),
-    run('Important', 'Photo store', async () => {
-      if (!window.indexedDB) return { status: 'Down', detail: 'IndexedDB is not available, so photos can’t be stored.' };
+    run('important', 'Photo store', async () => {
+      if (!window.indexedDB) return { status: 'down', detail: 'IndexedDB is not available, so photos can’t be stored.' };
       const n = await store.countPhotos();
-      return { status: 'OK', detail: `The photo store opened. ${core.formatNumber(n)} photo${n === 1 ? '' : 's'} in it.` };
+      return { status: 'ok', detail: `The photo store opened. ${core.formatNumber(n)} photo${n === 1 ? '' : 's'} in it.` };
     }),
-    run('Important', 'Backup export', async () => {
+    run('important', 'Backup export', async () => {
       const entries = await store.loadEntries();
-      const writer = window.AppBackupFile.createBackupWriter({}, new Date().toISOString(), null);
-      const parsed = JSON.parse(await writer.finish().text());
-      if (!parsed || parsed.app !== core.BACKUP_APP_ID) return { status: 'Down', detail: 'A test backup file was built but isn’t readable.' };
-      return { status: 'OK', detail: `A backup file can be built (${core.formatNumber(Object.keys(entries).length)} days would go in it).` };
+      /** @type {Record<string, import('../core.js').Entry>} */
+      const days = {};
+      for (const e of visibleEntries(entries)) days[e.date] = core.entryForBackup(e);
+      // Photos are counted, not embedded: the days are what a damaged save would break.
+      const photoCount = await store.countPhotos();
+      const writer = window.AppBackupFile.createBackupWriter(days, new Date().toISOString(), null);
+      const back = await window.AppBackupFile.checkBackup(writer.finish());
+      const expected = Object.keys(days).length;
+      if (!back.ok || back.dayCount !== expected) return { status: 'down', detail: 'A test backup of your saved days was built but can’t be read back.' };
+      return { status: 'ok', detail: `A test backup of your ${core.formatNumber(expected)} saved day${expected === 1 ? '' : 's'} was built and read back. ${core.formatNumber(photoCount)} photo${photoCount === 1 ? '' : 's'} would be added.` };
     }),
-    run('Key', 'Offline cache', async () => {
-      if (!('serviceWorker' in navigator) || !window.caches) return { status: 'Unknown', detail: 'This browser or address doesn’t support offline caching.' };
+    run('key', 'Offline cache', async () => {
+      if (!('serviceWorker' in navigator) || !window.caches) return { status: 'unknown', detail: 'This browser or address doesn’t support offline caching.' };
       const reg = await navigator.serviceWorker.getRegistration();
-      if (!reg) return { status: 'Warning', detail: 'The offline helper isn’t registered yet; it is after the first full load.' };
+      if (!reg) return { status: 'warning', detail: 'The offline helper isn’t registered yet; it is after the first full load.' };
       const [name, keys] = await Promise.all([buildCacheName(), window.caches.keys()]);
-      if (!name) return { status: 'Down', detail: 'The build’s cache name could not be read.' };
+      if (!name) return { status: 'down', detail: 'The build’s cache name could not be read.' };
       return keys.includes(name)
-        ? { status: 'OK', detail: `Registered; cache ${name} matches the build.` }
-        : { status: 'Warning', detail: `Registered, but the cache for build ${name} isn’t stored yet. Reload once.` };
+        ? { status: 'ok', detail: `Registered; cache ${name} matches the build.` }
+        : { status: 'warning', detail: `Registered, but the cache for build ${name} isn’t stored yet. Reload once.` };
     }),
-    run('Key', 'Time since last backup', async () => {
+    run('key', 'Time since last backup', async () => {
       const entries = await store.loadEntries();
-      if (Object.keys(entries).length === 0) return { status: 'OK', detail: 'Nothing logged yet, so nothing to back up.' };
+      if (Object.keys(entries).length === 0) return { status: 'ok', detail: 'Nothing logged yet, so nothing to back up.' };
       const last = lastBackup();
-      if (!last) return { status: 'Warning', detail: 'No backup file has been saved from this device yet.' };
+      if (!last) return { status: 'warning', detail: 'No backup file has been saved from this device yet.' };
       const days = core.daysBetween(core.localDateStr(new Date(last.at)), core.todayStr());
-      if (!last.confirmed) return { status: 'Warning', detail: 'A backup was made but not confirmed saved.' };
+      if (!last.confirmed) return { status: 'warning', detail: 'A backup was made but not confirmed saved.' };
       return days >= BACKUP_WARN_DAYS
-        ? { status: 'Warning', detail: `Last backup was ${days} days ago.` }
-        : { status: 'OK', detail: days === 0 ? 'Last backup was today.' : `Last backup was ${days} day${days === 1 ? '' : 's'} ago.` };
+        ? { status: 'warning', detail: `Last backup was ${days} days ago.` }
+        : { status: 'ok', detail: days === 0 ? 'Last backup was today.' : `Last backup was ${days} day${days === 1 ? '' : 's'} ago.` };
     }),
-    run('Key', 'Problem log', async () => {
+    run('key', 'Problem log', async () => {
       const n = problemLog().length;
-      return { status: n === 0 ? 'OK' : 'Warning', detail: n === 0 ? 'No problems recorded.' : `${core.formatNumber(n)} problem${n === 1 ? '' : 's'} recorded (see Settings).` };
+      return { status: n === 0 ? 'ok' : 'warning', detail: n === 0 ? 'No problems recorded.' : `${core.formatNumber(n)} problem${n === 1 ? '' : 's'} recorded (see Settings).` };
     }),
-    run('Basic', 'localStorage available', async () => (localStorageWorks() ? { status: 'OK', detail: 'Available.' } : { status: 'Down', detail: 'Not available.' })),
-    run('Basic', 'IndexedDB available', async () => (window.indexedDB ? { status: 'OK', detail: 'Available.' } : { status: 'Down', detail: 'Not available.' })),
-    run('Basic', 'Storage persistence', async () => {
+    run('basic', 'Browser storage for your days', async () => (localStorageWorks() ? { status: 'ok', detail: 'Available.' } : { status: 'down', detail: 'Not available.' })),
+    run('basic', 'Browser storage for photos', async () => (window.indexedDB ? { status: 'ok', detail: 'Available.' } : { status: 'down', detail: 'Not available.' })),
+    run('basic', 'Storage persistence', async () => {
       const p = await store.persistenceStatus();
-      if (p === null) return { status: 'Unknown', detail: 'This browser can’t say.' };
-      return p ? { status: 'OK', detail: 'Granted: the browser keeps the data when space is low.' } : { status: 'Warning', detail: 'Not granted: the browser may clear data when space is low.' };
+      if (p === null) return { status: 'unknown', detail: 'This browser can’t say.' };
+      return p ? { status: 'ok', detail: 'Granted: the browser keeps the data when space is low.' } : { status: 'warning', detail: 'Not granted: the browser may clear data when space is low.' };
     }),
-    run('Basic', 'Build and version', async () => {
+    run('basic', 'Build and version', async () => {
       const name = await buildCacheName();
-      return name ? { status: 'OK', detail: `Build ${name}.` } : { status: 'Unknown', detail: 'The build id could not be read.' };
+      const live = `Latest update went live ${core.formatMonthDay(LATEST_UPDATE.date, true)}.`;
+      return name ? { status: 'ok', detail: `Build ${name}. ${live}` } : { status: 'unknown', detail: `The build id could not be read. ${live}` };
     }),
-    run('Basic', 'Latest update', async () => ({ status: 'OK', detail: `Went live ${LATEST_UPDATE.date}.` })),
   ]);
 }
 
-/** @param {Row[]} rows @returns {Status} */
-function overall(rows) {
-  if (rows.some((r) => r.status === 'Down')) return 'Down';
-  if (rows.some((r) => r.status === 'Warning')) return 'Warning';
-  return rows.some((r) => r.status === 'OK') ? 'OK' : 'Unknown';
+/** The worst status among the Important rows; Key and Basic show their own badges. @param {Row[]} all @returns {Status} */
+function overall(all) {
+  const rows = all.filter((r) => r.tier === 'important');
+  if (rows.some((r) => r.status === 'down')) return 'down';
+  if (rows.some((r) => r.status === 'warning')) return 'warning';
+  return rows.some((r) => r.status === 'ok') ? 'ok' : 'unknown';
 }
 
 /** Adds timing, remembering when each check last passed on this device. */
 function withTimes(/** @type {Check[]} */ checks, /** @type {string} */ now) {
   return checks.map((c) => {
     const key = `adminOk:${c.name}`;
-    if (c.status === 'OK') prefs.set(key, now);
-    return { ...c, last_checked: now, last_success: c.status === 'OK' ? now : prefs.get(key, null), next_expected_run: null };
+    if (c.status === 'ok') prefs.set(key, now);
+    return { ...c, last_checked: now, last_success: c.status === 'ok' ? now : prefs.get(key, null), next_expected_run: null };
   });
 }
 
@@ -134,14 +143,14 @@ export async function buildAdmin() {
   const rows = withTimes(await allChecks(), now);
   const status = overall(rows);
   const json = { product: 'Free Calorie Counter', checked_at: now, overall: status, functions: rows };
-  const badge = (/** @type {Status} */ s) => h('span', { class: `admin-status is-${s.toLowerCase()}`, text: s });
+  const badge = (/** @type {Status} */ s) => h('span', { class: `admin-status is-${s}`, text: LABELS[s] });
   const when = (/** @type {string | null} */ t) => (t ? new Date(t).toLocaleString() : 'never');
 
   const groups = TIERS.map((tier) =>
     h(
       'section',
       { class: 'card', 'data-admin-tier': tier },
-      h('h3', { class: 'section-title', text: tier }),
+      h('h3', { class: 'section-title', text: TIER_TITLES[tier] }),
       h(
         'ul',
         { class: 'admin-list' },

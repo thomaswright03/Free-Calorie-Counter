@@ -15,6 +15,11 @@ IndexedDB on the user's device. No account, server, ads or analytics.
 - Removed the hidden legacy-app migration and legacy backup id; README server.js paragraph removed.
 - Tour renamed "Quick tour"; weight box says "Pounds only" (kg not supported; stated in the UI).
 
+## Fix round 2 (2026-10-21, after grade 80)
+- Status JSON uses lowercase tier/status/overall; overall = worst of Important rows only.
+- Backup export check builds a test file from real days and reads it back (Down if not); Latest update folded into Build and version row.
+- Storage rows renamed in plain words; dates shown as "Oct 21, 2026"; Settings has its own App status card.
+
 ## Decisions
 - Goal is a per-device pref (`fcc:dailyGoal`), not part of the entries blob.
 - Units stay US-only (lbs); kg support not built.
