@@ -53,3 +53,4 @@ failed and what was done about it.
 
 | Date | iPhone, iOS | Commit | Part | Result |
 |---|---|---|---|---|
+| 2026-10-21 | iPhone 14, iOS 18.7.2 | 44f4ed8 (live) | Both: steps run on the live site in a Safari tab (separate data from the Home Screen app), then Home Screen online and offline | All passed |
