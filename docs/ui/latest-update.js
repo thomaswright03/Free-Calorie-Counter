@@ -1,24 +1,18 @@
 // What the latest round of changes did, shown in Settings → Latest Update.
-// Update this file with every round: a unit test fails if its date is older
-// than the newest commit that touched docs/.
+// Each round REPLACES this file's contents: the date, a summary of this
+// round only, and this round's visible changes (6 at most). Earlier rounds
+// are in the git history, not here. A unit test fails if the date is older
+// than the newest commit that touched docs/, or the list grows past 6.
 
 export const LATEST_UPDATE = {
   date: '2026-10-21',
   summary:
-    'You can now set a daily calorie goal and see how much of it is left. There is a Status page that checks the app is working on this device, the tour is now called the Quick tour, the weight box says pounds only, and the app no longer carries code for an older private app. The apple trend icon and favicon arrived in the round before.',
+    'This round made the Status page easier to read and made releases safer. Times on the Status page now show your time zone, a check that can’t run says so in a plain sentence, the “Page not found” page shows the app’s icon, and a new version of the app only goes live after all of its tests pass.',
   /** What you can see in the app, listed first. */
   frontend: [
-    'Settings has a new Daily calorie goal box. Leave it empty to turn the goal off.',
-    'Today shows your calories as “of 2,000 goal · 500 left” (or “over”). History and Compare show each day against the goal.',
-    'The goal is saved in backup files and comes back when you restore one. Older backups without a goal still restore.',
-    'New Status page (Settings → App status): checks saving, photos, backup, offline use and storage, and shows Warning or Down if something is wrong.',
-    'Settings has a Latest Update section (this one).',
-    '“What’s new” is now the “Quick tour”, with wording that suits someone using the app for the first time.',
-    'The weight box says “Pounds only”.',
-    'The app icon and browser tab icon are the new apple trend logo.',
-    'Settings → Free and private links to the new Privacy policy and Terms of service.',
-    'The Privacy policy and Terms now name Wright AI Solutions as who runs the app, with thomas@wrightaisolutions.com as the contact. The Terms are governed by Arizona law.',
-    'Settings has its own App status card. The Status page now judges “Overall” by the Important checks only, checks a test backup of your real days, and uses plain names for the storage rows. Dates here read like “Oct 21, 2026”.',
-    'Tapping Log Meal right after typing your weight works on the first tap again (the button no longer shifts when the weight saves).',
+    'Status page times now include your time zone, like “Oct 21, 2026, 7:15 AM CDT”.',
+    'If a Status page check can’t run, it says “This check couldn’t run on this device” and gives the browser’s reason, instead of a code name.',
+    'The “Page not found” page shows the Free Calorie Counter icon in the browser tab.',
+    'New versions go live only after every test has passed, so a broken change can’t reach your phone.',
   ],
 };

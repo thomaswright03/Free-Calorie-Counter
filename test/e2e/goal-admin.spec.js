@@ -99,8 +99,18 @@ test('Backup export shows Down when the saved days can’t be put in a backup', 
   });
   await page.goto(`${appURL}/#/admin`);
   await page.reload();
-  await expect(page.locator('[data-check="Backup export"]')).toContainText('Down');
+  const row = page.locator('[data-check="Backup export"]');
+  await expect(row).toContainText('Down');
+  await expect(row).toContainText('This check couldn’t run on this device. The browser said: cannot serialise.');
+  await expect(row).not.toContainText('TypeError');
   await expect(page.locator('[data-overall]')).toHaveAttribute('data-overall', 'down');
+});
+
+test('status page times are on the device clock and name its time zone', async ({ page, appURL }) => {
+  await page.goto(`${appURL}/#/admin`);
+  // The tests run on Chicago time (CDT in September).
+  await expect(page.locator('[data-check="Meal and weight saving"] .admin-times')).toHaveText(/^Last checked Sep 24, 2026, 10:\d\d AM CDT · last success Sep 24, 2026, 10:\d\d AM CDT$/);
+  await expect(page.getByText(/^Checked Sep 24, 2026, 10:\d\d AM CDT\./)).toBeVisible();
 });
 
 test('blocked IndexedDB shows the photo store and the overall status as Down', async ({ page, appURL }) => {
@@ -120,7 +130,9 @@ test('Settings has a Latest Update card with the frontend changes first', async 
   await expect(card.getByRole('heading', { name: 'Frontend changes' })).toBeVisible();
   const headings = await card.getByRole('heading').allTextContents();
   expect(headings).toEqual(['Latest Update', 'Frontend changes', 'Summary']);
-  await expect(card).toContainText('apple trend logo');
+  await expect(card).toContainText('time zone');
+  // Only the latest round is listed: older rounds are replaced, not added to.
+  expect(await card.locator('.update-list li').count()).toBeLessThanOrEqual(6);
   await expect(card).toContainText(/[A-Z][a-z]{2} \d{1,2}, \d{4}/);
   await expect(card).not.toContainText(/\d{4}-\d{2}-\d{2}/);
   await page.locator('[data-app-status] a').click();

@@ -131,11 +131,16 @@ merged into it.
    of [RELEASE-CHECKLIST.md](RELEASE-CHECKLIST.md) on an iPhone (install to
    the Home Screen, log a meal, add a photo, export with Save to Files and
    import that file back). Then merge or push to the published branch.
-3. Pages redeploys within a minute or two (see the repository's Actions tab).
+3. The **Tests / deploy** job publishes `docs/` to Pages only after
+   **Tests / test** and **Tests / webkit** pass on `main`, so a red run
+   never goes live. (This needs *Settings → Pages → Source: GitHub
+   Actions*; while the source is still "Deploy from a branch" the job
+   says so and stops, and Pages deploys from the branch as before. See
+   [Where the app is published](REFERENCE.md#where-the-app-is-published).)
    Phones load the new version the next time the app is opened online.
    Finish the checklist's "After Pages deploys" part on the live app.
 
 Rolling back: `git revert` the commit(s) that caused the problem, push to the
-published branch, and Pages redeploys the previous files. User data is never
+published branch, and once the tests pass the deploy job publishes the previous files. User data is never
 part of a deploy, so a rollback doesn't touch anyone's logged days or photos;
 the app reads every older storage format.

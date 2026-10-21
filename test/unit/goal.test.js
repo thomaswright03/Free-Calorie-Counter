@@ -38,6 +38,8 @@ test('Latest Update is at least as new as the newest commit touching docs/ (when
   const { LATEST_UPDATE } = { LATEST_UPDATE: parseUpdate(fs.readFileSync(path.join(root, 'docs/ui/latest-update.js'), 'utf8')) };
   assert.match(LATEST_UPDATE.date, /^\d{4}-\d{2}-\d{2}$/);
   assert.ok(LATEST_UPDATE.frontendCount > 0);
+  // Each round replaces the last one's list instead of adding to it.
+  assert.ok(LATEST_UPDATE.frontendCount <= 6, `Latest Update lists ${LATEST_UPDATE.frontendCount} changes: list only the latest round (6 at most)`);
   let newest = '';
   try {
     newest = execFileSync('git', ['log', '-1', '--format=%cs', '--', 'docs'], { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
