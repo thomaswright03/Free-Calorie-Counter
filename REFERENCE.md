@@ -395,6 +395,6 @@ in `docs/build/` are committed (see above).
 - Operator named on both pages: Wright AI Solutions.
 - Contact for both: thomas@wrightaisolutions.com (given by the owner,
   2026-10-20).
-- Lawyer review: the owner reported on 2026-10-20 that a lawyer reviewed the
-  app (health data) and said it is good to go. Reviewer's name and the date
-  of the review: not yet recorded.
+- Lawyer review: done. The owner reported on 2026-10-20 that a lawyer
+  reviewed the app (health data) and said it is good to go. The owner
+  decided the reviewer's name and the review date don't need recording.

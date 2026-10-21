@@ -25,6 +25,6 @@ WebKit job runs in CI only. Rebuild with `npm run build` after editing `docs/` (
 
 ## Open / next
 - Real-iPhone run of RELEASE-CHECKLIST.md (Thomas); Record table is empty.
-- Lawyer review: owner says done and approved (2026-10-20); reviewer name and review date still to record in REFERENCE.md → Legal. Contact email set; operator set to Wright AI Solutions (confirmed by the owner, 2026-10-21).
+- Lawyer review: done and approved per the owner (2026-10-20); the owner says reviewer name and date are not needed (2026-10-21), so don't ask again. Contact email set; operator set to Wright AI Solutions (confirmed by the owner, 2026-10-21).
 - Thomas to approve the `/admin/status.json` exception (or ask for a CI-generated file).
 - Optional: kg setting.
