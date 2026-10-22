@@ -1154,3 +1154,303 @@ body.is-touring { padding-bottom: 100vh; }
 .admin-status.is-warning { color: var(--warning-text); background: var(--warning-soft); border-color: var(--warning-border); }
 .admin-status.is-down { color: var(--danger); background: var(--danger-soft); }
 .admin-status.is-unknown { color: var(--muted); }
+
+/* ------------------------------------------------------------ motion */
+
+/* Everything that moves lives here, and only for people who haven't asked
+   their phone to reduce motion. Only opacity and transform are animated
+   (plus a few short color fades), so the phone's GPU does the work and
+   scrolling stays smooth on an iPhone. Nothing waits for an animation:
+   the screen is usable the moment it's drawn. */
+
+html {
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 0.16s;
+  --dur: 0.32s;
+  --dur-slow: 0.6s;
+}
+
+/* The sliding highlight behind the open tab. Placed by updateTabs (it
+   sets --tab to the open tab's column); hidden on screens without a tab. */
+.tabs { position: relative; }
+.tab { position: relative; z-index: 1; }
+.tab-indicator {
+  position: absolute;
+  top: var(--s1);
+  bottom: var(--s1);
+  left: var(--s1);
+  width: calc((100% - 5 * var(--s1)) / 4);
+  border-radius: var(--r-sm);
+  background: var(--accent);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--accent) 35%, transparent);
+  transform: translateX(calc(var(--tab, 0) * (100% + var(--s1))));
+  opacity: 0;
+  pointer-events: none;
+}
+.tabs.has-indicator .tab-indicator.is-on { opacity: 1; }
+.tabs.has-indicator .tab[aria-current='page'] { background: transparent; }
+
+/* The goal meter under the day's total: how much of the goal is used. */
+.goal-meter {
+  height: 8px;
+  margin: var(--s3) auto 0;
+  max-width: 260px;
+  border-radius: var(--r-pill);
+  background: var(--card);
+  overflow: hidden;
+}
+.goal-meter-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+  transform-origin: left center;
+  transform: scaleX(var(--p, 0));
+}
+.goal-meter.is-over .goal-meter-fill { background: var(--danger); }
+
+@media (prefers-reduced-motion: no-preference) {
+  /* ---- screens: each card rises into place, one after another, and
+     slides in from the side of the tab it came from. */
+  .view-enter.screen-stack > *,
+  .view-enter:not(.screen-stack) {
+    animation: screen-in var(--dur) var(--ease-out) both;
+    animation-delay: calc(min(var(--i, 0), 5) * 55ms);
+  }
+  .main[data-dir='forward'] { --enter-x: 18px; }
+  .main[data-dir='back'] { --enter-x: -18px; }
+  @keyframes screen-in {
+    from { opacity: 0; transform: translate3d(var(--enter-x, 0), 14px, 0) scale(0.985); }
+    to { opacity: 1; transform: none; }
+  }
+  /* The tour measures where things are, so screens open in place under it. */
+  body.is-touring .view-enter.screen-stack > *,
+  body.is-touring .view-enter:not(.screen-stack) { animation: none; }
+
+  /* Lists on a freshly opened screen follow their card in. */
+  .view-enter .meal-row,
+  .view-enter .history-item,
+  .view-enter .photo-thumb,
+  .view-enter .compare-answer,
+  .view-enter .amount-row {
+    animation: item-in 0.38s var(--ease-out) both;
+    animation-delay: calc(120ms + min(var(--i, 0), 10) * 35ms);
+  }
+  body.is-touring .view-enter .meal-row,
+  body.is-touring .view-enter .history-item,
+  body.is-touring .view-enter .photo-thumb,
+  body.is-touring .view-enter .compare-answer,
+  body.is-touring .view-enter .amount-row { animation: none; }
+  @keyframes item-in {
+    from { opacity: 0; transform: translate3d(0, 8px, 0); }
+    to { opacity: 1; transform: none; }
+  }
+  .view-enter .photo-thumb { animation-name: thumb-in; }
+  @keyframes thumb-in {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: none; }
+  }
+
+  /* ---- tabs */
+  .tabs.has-indicator.is-ready .tab-indicator {
+    transition: transform 0.42s var(--ease-spring), opacity var(--dur-fast) ease;
+  }
+  .tab, .settings-link { transition: color 0.2s ease, background-color 0.2s ease, transform var(--dur-fast) var(--ease-out); }
+  .settings-link svg { transition: transform 0.6s var(--ease-out); }
+  .settings-link[aria-current='page'] svg { transform: rotate(90deg); }
+
+  /* ---- buttons: a soft press, and a spring back on release */
+  .btn,
+  .btn-text,
+  .icon-btn,
+  .meal-pill,
+  .segment,
+  .history-item,
+  .photo-thumb,
+  .toast-action {
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.2s ease, transform 0.36s var(--ease-spring);
+  }
+  .btn:active:not(:disabled),
+  .meal-pill:active,
+  .segment:active,
+  .tab:active,
+  .settings-link:active { transform: scale(0.96); transition-duration: 0.08s; }
+  .btn-text:active,
+  .icon-btn:active,
+  .toast-action:active { transform: scale(0.9); transition-duration: 0.08s; }
+  .history-item:active,
+  .photo-thumb:active { transform: scale(0.98); transition-duration: 0.08s; }
+  .meal-link { transition: transform var(--dur-fast) var(--ease-out); }
+  .meal-link:active { transform: translateX(3px); }
+  .btn-primary { box-shadow: 0 2px 10px color-mix(in srgb, var(--accent) 28%, transparent); }
+  @media (hover: hover) {
+    .btn-primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 18px color-mix(in srgb, var(--accent) 34%, transparent); }
+    .history-item:hover { transform: translateX(2px); }
+    .history-item:hover .chevron { transform: translateX(3px); }
+    .photo-thumb:hover img { transform: scale(1.04); }
+  }
+  .chevron { display: inline-block; transition: transform 0.25s var(--ease-out); }
+  .photo-thumb img { transition: transform 0.4s var(--ease-out), opacity 0.2s ease; }
+
+  /* The meal chosen on Log Meal pops a little as it lights up. */
+  .meal-pill.active { animation: pop 0.36s var(--ease-spring); }
+  .segment[aria-pressed='true'],
+  input:checked + .segment { animation: pop 0.32s var(--ease-spring); }
+  @keyframes pop {
+    0% { transform: scale(0.94); }
+    100% { transform: none; }
+  }
+
+  /* ---- the day's total and its goal */
+  .total-num { display: inline-block; }
+  .total-num.is-counting { animation: total-glow 0.7s var(--ease-out); }
+  @keyframes total-glow {
+    0% { transform: scale(0.96); }
+    45% { transform: scale(1.04); }
+    100% { transform: none; }
+  }
+  .goal-meter-fill { transition: transform 0.9s var(--ease-out), background-color 0.3s ease; }
+  .goal-meter.is-fresh .goal-meter-fill { animation: meter-in 0.9s var(--ease-out) 0.15s both; }
+  @keyframes meter-in { from { transform: scaleX(0); } }
+
+  /* A meal just logged, changed, removed or put back flashes once. */
+  .meal-row.is-changed { animation: row-flash 1s var(--ease-out); }
+  .meal-row.is-changed .meal-value,
+  .meal-row.is-changed .meal-empty { animation: value-pop 0.45s var(--ease-spring); }
+  @keyframes row-flash {
+    0% { background: color-mix(in srgb, var(--accent) 22%, transparent); }
+    100% { background: transparent; }
+  }
+  @keyframes value-pop {
+    0% { transform: scale(0.85); opacity: 0.4; }
+    100% { transform: none; opacity: 1; }
+  }
+  .meal-value, .meal-empty { display: inline-block; transform-origin: left center; }
+
+  /* ---- inputs: a saved tick that springs in, a nudge on a mistake */
+  .field-status:not(:empty) { animation: status-in 0.28s var(--ease-out); }
+  .field-status.is-saved::before { display: inline-block; animation: tick 0.5s var(--ease-spring); }
+  @keyframes status-in {
+    from { opacity: 0; transform: translate3d(0, -3px, 0); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes tick {
+    0% { transform: scale(0) rotate(-30deg); }
+    100% { transform: none; }
+  }
+  input[aria-invalid='true'] { animation: nudge 0.38s var(--ease-out); }
+  @keyframes nudge {
+    0%, 100% { transform: none; }
+    20% { transform: translateX(-5px); }
+    40% { transform: translateX(4px); }
+    60% { transform: translateX(-3px); }
+    80% { transform: translateX(2px); }
+  }
+  input[type='text'], input[type='date'], select { transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+  input[type='text']:focus, input[type='date']:focus { box-shadow: 0 0 0 4px color-mix(in srgb, var(--focus) 18%, transparent); }
+
+  /* ---- charts: the line draws itself, then the dots land on it */
+  .chart-svg.is-drawing .line {
+    stroke-dasharray: 1;
+    animation: draw-line 1s var(--ease-in-out) both;
+  }
+  @keyframes draw-line {
+    from { stroke-dashoffset: 1; }
+    to { stroke-dashoffset: 0; }
+  }
+  .chart-svg.is-drawing .line-gap { animation: fade-in 0.4s ease 0.6s both; }
+  .chart-svg.is-drawing .dot:not(.dot-hover),
+  .chart-svg.is-drawing .partial-label {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: dot-in 0.4s var(--ease-spring) both;
+    animation-delay: calc(0.25s + var(--t, 0) * 0.7s);
+  }
+  .chart-svg.is-drawing .gridline,
+  .chart-svg.is-drawing .axis-label { animation: fade-in 0.4s ease both; }
+  @keyframes dot-in {
+    from { opacity: 0; transform: scale(0); }
+    to { opacity: 1; transform: none; }
+  }
+  .chart-tooltip { transition: opacity 0.12s ease, left 0.12s var(--ease-out), top 0.12s var(--ease-out); }
+
+  /* Compare's bars grow from zero. */
+  .view-enter .amount-bar { transform-origin: left center; animation: bar-grow 0.8s var(--ease-out) both; animation-delay: calc(200ms + min(var(--i, 0), 10) * 60ms); }
+  @keyframes bar-grow { from { transform: scaleX(0); } }
+
+  /* ---- dialogs and the photo viewer: rise and settle, over a fading dim */
+  .dialog[open] { animation: dialog-in 0.34s var(--ease-spring); }
+  .dialog[open]::backdrop { animation: fade-in 0.25s ease; }
+  @keyframes dialog-in {
+    from { opacity: 0; transform: translate3d(0, 16px, 0) scale(0.95); }
+    to { opacity: 1; transform: none; }
+  }
+  .viewer-img, .compare-img { animation: fade-in 0.35s ease; }
+
+  /* ---- messages */
+  .toast { animation: toast-in 0.42s var(--ease-spring); }
+  .toast.is-leaving { animation: toast-out 0.2s ease forwards; }
+  @keyframes toast-in {
+    from { opacity: 0; transform: translate3d(0, 24px, 0) scale(0.92); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes toast-out {
+    to { opacity: 0; transform: translate3d(0, 12px, 0) scale(0.96); }
+  }
+  .banner { animation: banner-in 0.36s var(--ease-out); }
+  @keyframes banner-in {
+    from { opacity: 0; transform: translate3d(0, -10px, 0); }
+    to { opacity: 1; transform: none; }
+  }
+  .loading:not([hidden]) { animation: loading-in 0.25s var(--ease-spring); }
+  @keyframes loading-in {
+    from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+    to { opacity: 1; transform: translate(-50%, -50%); }
+  }
+  .main.is-loading { transition: opacity 0.25s ease; }
+  .notice-more[open] > :not(summary),
+  .compare-meals[open] > :not(summary) { animation: item-in 0.3s var(--ease-out); }
+  .compare-meals summary::before,
+  .notice-more summary::before { transition: transform 0.2s var(--ease-out); }
+
+  /* ---- What's new tour: the dim fades up, the card springs in, and
+     the light around each feature breathes. */
+  .tour-layer { animation: fade-in 0.3s ease; }
+  .tour-card { animation: tour-card-in 0.45s var(--ease-spring); transition: top 0.45s var(--ease-out), left 0.45s var(--ease-out), opacity 0.2s ease, transform 0.25s var(--ease-out); }
+  .tour-spot { transition: top 0.45s var(--ease-out), left 0.45s var(--ease-out), width 0.45s var(--ease-out), height 0.45s var(--ease-out); }
+  .tour-layer.is-moving .tour-card { transform: scale(0.98); }
+  .tour-arrow { transition: left 0.45s var(--ease-out); }
+  .tour-spot::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 55%, transparent);
+    animation: spot-breathe 2.2s ease-in-out 0.5s infinite;
+  }
+  .tour-layer.is-centered .tour-spot::after { display: none; }
+  .tour-points li { animation: item-in 0.35s var(--ease-out) both; }
+  .tour-points li:nth-child(2) { animation-delay: 60ms; }
+  .tour-points li:nth-child(3) { animation-delay: 120ms; }
+  .tour-points li:nth-child(n + 4) { animation-delay: 180ms; }
+  .tour-dot { transition: width 0.35s var(--ease-spring), background-color 0.2s ease; }
+  @keyframes tour-card-in {
+    from { opacity: 0; transform: translate3d(0, 20px, 0) scale(0.94); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes spot-breathe {
+    0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 55%, transparent); }
+    50% { box-shadow: 0 0 0 8px color-mix(in srgb, var(--accent) 0%, transparent); }
+  }
+
+  /* First launch: the header settles in with the first screen. */
+  .boot-loading { animation: fade-in 0.4s ease 0.15s both; }
+
+  /* Switching theme in Settings cross-fades the whole app. */
+  ::view-transition-old(root),
+  ::view-transition-new(root) { animation-duration: 0.4s; animation-timing-function: var(--ease-in-out); }
+
+  @keyframes fade-in { from { opacity: 0; } }
+}
