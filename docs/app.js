@@ -3,7 +3,7 @@
 // live in ui/.
 
 import { h, prefs, byId } from './ui/dom.js';
-import { applyTheme, followSystemTheme } from './ui/theme.js';
+import { applyTheme, followSystemTheme, DEFAULT_THEME } from './ui/theme.js';
 import { store } from './ui/store.js';
 import { startRouter } from './ui/router.js';
 import { render, registerScreens, getCurrentView, refreshCurrentScreen } from './ui/render.js';
@@ -58,7 +58,7 @@ function renderBlocked() {
 
 async function start() {
   recordUncaughtErrors();
-  applyTheme(prefs.get('theme', 'system'));
+  applyTheme(prefs.get('theme', DEFAULT_THEME));
   followSystemTheme();
   byId('storageNote').textContent = 'Data is saved only in this browser, on this device.';
   const status = await store.init();

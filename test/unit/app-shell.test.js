@@ -73,7 +73,9 @@ test("the browser's theme colours and the splash screen match the page backgroun
   const theme = fs.readFileSync(path.join(docs, 'ui', 'theme.js'), 'utf8');
   assert.match(theme, new RegExp(`THEME_COLORS = \\{ light: '${light}', dark: '${dark}' \\}`));
   const manifest = JSON.parse(fs.readFileSync(path.join(docs, 'manifest.webmanifest'), 'utf8'));
-  assert.equal(manifest.background_color, light);
+  // Dark is the default theme, so the splash screen and title bar are dark.
+  assert.equal(manifest.background_color, dark);
+  assert.equal(manifest.theme_color, dark);
   const notFound = fs.readFileSync(path.join(docs, '404.html'), 'utf8');
   assert.ok(notFound.includes(`--bg: ${light};`) && notFound.includes(`--bg: ${dark};`), '404.html uses the same backgrounds');
 });

@@ -1,10 +1,13 @@
-// Light, dark or follow-the-system theme, including the browser's
+// Light, dark (the default) or follow-the-system theme, including the browser's
 // theme-color so the status bar matches.
 
 import { prefs } from './dom.js';
 
 // The page background (--bg in style.css) of each theme.
 const THEME_COLORS = { light: '#f1f5f9', dark: '#0f172a' };
+/** The theme for anyone who hasn't chosen one in Settings. */
+export const DEFAULT_THEME = 'dark';
+
 const darkQuery = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
 
 /** @param {string} pref 'system', 'light' or 'dark' */
@@ -31,7 +34,7 @@ export function applyTheme(pref) {
 export function followSystemTheme() {
   if (!darkQuery) return;
   const onSystemChange = () => {
-    if (prefs.get('theme', 'system') === 'system') applyTheme('system');
+    if (prefs.get('theme', DEFAULT_THEME) === 'system') applyTheme('system');
   };
   if (darkQuery.addEventListener) darkQuery.addEventListener('change', onSystemChange);
   else if (darkQuery.addListener) darkQuery.addListener(onSystemChange);
