@@ -3,7 +3,7 @@
 // address and doesn't move by itself, so the copy at the old address asks
 // people to save a backup to import at the new one (see backup-reminder.js).
 
-export const NEW_ADDRESS = 'https://calories.wrightaisolutions.com/';
+export const NEW_ADDRESS = 'https://calories.wright-ai-solutions.com/';
 
 /**
  * The new address when this copy runs at the old one, otherwise null.

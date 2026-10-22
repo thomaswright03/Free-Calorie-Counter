@@ -19,7 +19,7 @@ test('at the old address, Today asks for a backup to move to the new one, once',
   await page.evaluate((e) => localStorage.setItem('fcc:entries', JSON.stringify(e)), { [TODAY]: day(TODAY, { lunch: 500 }) });
   await page.reload();
   const card = page.locator('[data-backup-reminder="move"]');
-  await expect(card).toContainText('Free Calorie Counter is moving to calories.wrightaisolutions.com');
+  await expect(card).toContainText('Free Calorie Counter is moving to calories.wright-ai-solutions.com');
   await expect(card).toContainText('Settings → Import Backup');
   // The Home Screen note would install the old address, so it isn't shown.
   await expect(page.locator('[data-install-note]')).toHaveCount(0);

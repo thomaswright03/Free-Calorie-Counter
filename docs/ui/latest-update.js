@@ -7,10 +7,10 @@
 export const LATEST_UPDATE = {
   date: '2026-10-22',
   summary:
-    'This round is about keeping your data safe. Free Calorie Counter is moving to its own address, calories.wrightaisolutions.com, so no other website can share its storage on your phone; Today asks you to save a backup to bring with you. You can now delete everything the app saved from Settings, the app blocks scripts from anywhere else, backups only bring back real photos, and the app opens about two seconds sooner on a slow connection.',
+    'This round is about keeping your data safe. Free Calorie Counter is moving to its own address, calories.wright-ai-solutions.com, so no other website can share its storage on your phone; Today asks you to save a backup to bring with you. You can now delete everything the app saved from Settings, the app blocks scripts from anywhere else, backups only bring back real photos, and the app opens about two seconds sooner on a slow connection.',
   /** What you can see in the app, listed first. */
   frontend: [
-    'Today: “Free Calorie Counter is moving to calories.wrightaisolutions.com” asks you to save a backup, which you then import at the new address (Settings → Import Backup).',
+    'Today: “Free Calorie Counter is moving to calories.wright-ai-solutions.com” asks you to save a backup, which you then import at the new address (Settings → Import Backup).',
     'Settings: a new “Delete all my data…” button removes every day, goal, setting and photo from this browser, after you confirm.',
     'Restoring a backup now only accepts photos in common image types (JPEG, PNG, WebP, GIF, HEIC); other files, or files whose contents aren’t really an image, are rejected.',
     'The first visit on a slow connection opens about two seconds sooner.',

@@ -36,7 +36,7 @@ IndexedDB on the user's device. No account, server, ads or analytics.
 - `/admin/status.json` exception: APPROVED by the owner 2026-10-21 (REFERENCE.md, Status page section).
 - Branch protection on `main` and Pages source "GitHub Actions": repository settings only the owner can change.
 
-## Own address (2026-10-22, owner chose calories.wrightaisolutions.com)
+## Own address (2026-10-22, owner chose calories.wright-ai-solutions.com)
 - Old-address copy shows a "moving" backup card on Today (`docs/ui/new-address.js`, `backup-reminder.js`); owner steps in REFERENCE.md *Moving to the new address*.
 - Red main fixed: modulepreload for build/app.js (the CSP meta stopped Chromium preloading it, +2 s on slow 3G); erase-all, problem-log (CSP blocks inline test script) and Latest Update e2e tests updated.
 
