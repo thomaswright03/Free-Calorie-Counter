@@ -9,6 +9,7 @@
 const { isValidDateStr, isFutureDate, daysBetween, localDateStr } = require('./dates.js');
 const { MEAL_KEYS, isEntryEmpty, roundWeight } = require('./entries.js');
 const { validateIncomingEntry } = require('./input.js');
+const { sniffImageType } = require('./photos.js');
 
 // Backup file (version 2):
 //   { app: "free-calorie-counter", version: 2, exportedAt, entries: { "YYYY-MM-DD": entry },
@@ -89,7 +90,17 @@ function checkBackupPhoto(p, n) {
   if (typeof p.data !== 'string' || p.data.length === 0 || !/^[A-Za-z0-9+/]+=*$/.test(p.data)) {
     return { ok: false, error: `Photo ${n}'s image data is damaged.` };
   }
-  return { ok: true, photo: { date: p.date, createdAt: p.createdAt, type: p.type, data: p.data } };
+  // The claimed type is not trusted: the first bytes must really be one of the allowed image formats.
+  let head = null;
+  try {
+    const raw = atob(p.data.slice(0, 48));
+    head = Uint8Array.from(raw, (c) => c.charCodeAt(0));
+  } catch {
+    head = null;
+  }
+  const sniffed = sniffImageType(head);
+  if (!sniffed || !/^image\/(jpeg|png|webp|gif|heic|heif)$/.test(sniffed)) return { ok: false, error: `Photo ${n} isn't an image.` };
+  return { ok: true, photo: { date: p.date, createdAt: p.createdAt, type: sniffed, data: p.data } };
 }
 
 /**

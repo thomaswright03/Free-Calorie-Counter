@@ -26,8 +26,8 @@ test('the scanner splits out each photo and the other values, however the text i
     exportedAt: '2026-09-24T10:00:00.000Z',
     entries: { '2026-09-24': { date: '2026-09-24', weight: 180.5, meals: meals({ lunch: 600 }) }, note: { a: [1, { b: '}],' }] } },
     photos: [
-      { date: '2026-09-23', createdAt: 'x', type: 'image/jpeg', data: 'AAAA' },
-      { date: '2026-09-24', createdAt: 'y "quoted" \\ back\\slash, [brackets] {braces}', type: 'image/png', data: 'BBBB' },
+      { date: '2026-09-23', createdAt: 'x', type: 'image/jpeg', data: '/9j/4AAQSkZJRgAB' },
+      { date: '2026-09-24', createdAt: 'y "quoted" \\ back\\slash, [brackets] {braces}', type: 'image/png', data: 'iVBORw0KGgoAAAAN' },
     ],
     trailing: true,
   };
@@ -57,7 +57,7 @@ async function roundTrip(photoCount) {
   const writer = createBackupWriter(entries, '2026-09-24T10:00:00.000Z');
   const photos = [];
   for (let i = 0; i < photoCount; i += 1) {
-    const data = Buffer.alloc(300 * 1024 + i, i % 251).toString('base64');
+    const data = Buffer.concat([Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0, 0x10, 0x4a, 0x46, 0x49, 0x46, 0, 1]), Buffer.alloc(300 * 1024 + i, i % 251)]).toString('base64');
     const photo = { date: '2026-09-23', createdAt: new Date(Date.UTC(2026, 8, 23, 0, 0, i)).toISOString(), type: 'image/jpeg', data };
     photos.push(photo);
     writer.addPhoto(photo);
@@ -96,7 +96,7 @@ test('checking a backup reports problems without importing anything', async () =
   assert.match(unreadable.error, /isn't readable backup data/);
 
   const badPhoto = await checkBackup(
-    new Blob([JSON.stringify({ entries: {}, photos: [{ date: '2026-01-01', createdAt: 'nope', type: 'image/jpeg', data: 'AA==' }, 7] })])
+    new Blob([JSON.stringify({ entries: {}, photos: [{ date: '2026-01-01', createdAt: 'nope', type: 'image/jpeg', data: '/9j/4AAQSkZJRgAB' }, 7] })])
   );
   assert.equal(badPhoto.ok, false);
   assert.match(badPhoto.error, /^Nothing was imported\. Photo 1 has no valid upload time\. \(and 1 more problem\)/);
@@ -105,7 +105,7 @@ test('checking a backup reports problems without importing anything', async () =
     new Blob([
       JSON.stringify({
         entries: { '2026-09-01': { meals: { breakfast: -5 } }, '2026-09-02': { meals: { lunch: 600 } } },
-        photos: [7, { date: '2026-09-02', createdAt: '2026-09-02T08:00:00.000Z', type: 'image/jpeg', data: 'AA==' }],
+        photos: [7, { date: '2026-09-02', createdAt: '2026-09-02T08:00:00.000Z', type: 'image/jpeg', data: '/9j/4AAQSkZJRgAB' }],
       }),
     ])
   );
@@ -114,7 +114,7 @@ test('checking a backup reports problems without importing anything', async () =
   assert.equal(mixed.photoCount, 1);
   assert.deepEqual(mixed.skipped, ["Breakfast on Tue, Sep 1 (-5): Calories can't be negative. Enter 0 or more.", "Photo 1 isn't in the expected format."]);
   const handed = [];
-  await forEachBackupPhoto(new Blob([JSON.stringify({ entries: {}, photos: [7, { date: '2026-09-02', createdAt: '2026-09-02T08:00:00.000Z', type: 'image/jpeg', data: 'AA==' }] })]), async (p, n) => {
+  await forEachBackupPhoto(new Blob([JSON.stringify({ entries: {}, photos: [7, { date: '2026-09-02', createdAt: '2026-09-02T08:00:00.000Z', type: 'image/jpeg', data: '/9j/4AAQSkZJRgAB' }] })]), async (p, n) => {
     handed.push(n);
   });
   assert.deepEqual(handed, [2], 'photos listed as left out are passed over');

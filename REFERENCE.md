@@ -379,6 +379,10 @@ change once branch protection is on: in **Settings → Branches**, add a rule
 for the published branch (see [Where the app is published](#where-the-app-is-published)), tick *Require status checks to pass
 before merging*, and select both checks.
 
+### Shared origin risk
+
+The app currently shares the origin `thomaswright03.github.io` with other Pages sites on the account (e.g. `/Kenna/`). Storage is per origin, so scripts there could read this app's data. Don't add Pages sites to the account; the fix is a custom domain (`docs/CNAME`) plus a move-your-data notice. See SECURITY.md.
+
 ### Where the app is published
 
 The published branch is **`main`** (also the repository's default

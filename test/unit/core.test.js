@@ -246,7 +246,7 @@ test('backup parsing rejects malformed files with a specific message', () => {
   assert.match(core.parseBackup(JSON.stringify({ entries: { '2026-01-01': { weight: 5, meals: {} } } })).error, /weight/);
   assert.match(core.parseBackup(JSON.stringify({ version: 99, entries: {} })).error, /newer version/);
   assert.match(
-    core.parseBackup(JSON.stringify({ entries: {}, photos: [{ date: '2026-01-01', createdAt: 'x', type: 'image/jpeg', data: 'AA==' }] })).error,
+    core.parseBackup(JSON.stringify({ entries: {}, photos: [{ date: '2026-01-01', createdAt: 'x', type: 'image/jpeg', data: '/9j/4AAQSkZJRgAB' }] })).error,
     /upload time/
   );
 });
@@ -256,7 +256,7 @@ test('a whole backup parses with its days and photos; version-1 files still impo
     '2026-09-23': entry('2026-09-23', { breakfast: 400 }, 180.2),
     '2026-09-24': entry('2026-09-24', {}, 179.8),
   };
-  const photos = [{ date: '2026-09-23', createdAt: '2026-09-23T08:00:00.000Z', type: 'image/jpeg', data: 'AAECAw==' }];
+  const photos = [{ date: '2026-09-23', createdAt: '2026-09-23T08:00:00.000Z', type: 'image/jpeg', data: '/9j/4AAQSkZJRgAB' }];
   const parsed = core.parseBackup(JSON.stringify({ app: 'free-calorie-counter', version: 2, exportedAt: '2026-09-24T10:00:00.000Z', entries, photos }));
   assert.equal(parsed.ok, true);
   assert.deepEqual(parsed.entries, entries);
@@ -447,7 +447,7 @@ test('a backup with some days outside the rules restores the rest and lists what
       '2026-09-02': entry('2026-09-02', { lunch: 600 }),
       '2026-09-03': { date: '2026-09-03', weight: 12, meals: {} },
     },
-    photos: [{ date: '2026-09-02', createdAt: 'never', type: 'image/jpeg', data: 'AA==' }],
+    photos: [{ date: '2026-09-02', createdAt: 'never', type: 'image/jpeg', data: '/9j/4AAQSkZJRgAB' }],
   });
   assert.equal(parsed.ok, true);
   assert.deepEqual(Object.keys(parsed.entries), ['2026-09-02']);

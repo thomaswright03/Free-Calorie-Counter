@@ -21,7 +21,14 @@ test('every page has a Content-Security-Policy whose script hashes match its inl
 });
 
 test('a backup photo that is not a plain raster image type (such as SVG) is rejected', () => {
-  const photo = (type) => ({ entries: {}, photos: [{ date: '2026-01-01', createdAt: '2026-01-01T08:00:00.000Z', type, data: 'AA==' }] });
+  const photo = (type) => ({ entries: {}, photos: [{ date: '2026-01-01', createdAt: '2026-01-01T08:00:00.000Z', type, data: '/9j/4AAQSkZJRgAB' }] });
   assert.match(core.parseBackup(JSON.stringify(photo('image/svg+xml'))).error, /isn't an image/);
   assert.equal(core.parseBackup(JSON.stringify(photo('image/webp'))).error, undefined);
+});
+
+test('a backup photo whose bytes are not the image type it claims is rejected', () => {
+  const photo = (data) => ({ entries: {}, photos: [{ date: '2026-01-01', createdAt: '2026-01-01T08:00:00.000Z', type: 'image/png', data }] });
+  const text = Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"/>').toString('base64');
+  assert.match(core.parseBackup(JSON.stringify(photo(text))).error, /isn't an image/);
+  assert.equal(core.parseBackup(JSON.stringify(photo('iVBORw0KGgoAAAAN'))).error, undefined);
 });
