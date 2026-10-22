@@ -12,6 +12,6 @@ export const LATEST_UPDATE = {
   frontend: [
     'Importing a backup larger than 200 MB is refused with a clear message instead of freezing the phone.',
     'Opening the app at an http:// address now moves you to the secure https:// address.',
-    'Every page now sends no referrer when you follow a link.',
+    'If another website tries to show the app inside its own page, you now get a link to open it on its own instead.',
   ],
 };

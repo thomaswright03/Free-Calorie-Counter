@@ -45,6 +45,10 @@ IndexedDB on the user's device. No account, server, ads or analytics.
 - Data: entry gains optional `foods: { meal: [{ name, calories }] }`; `meals[key]` is always their sum (core/entries.js). Typing a total drops that meal's foods. Old days and backups have no `foods` and read unchanged; backup version stays 2.
 - Tests: test/unit/foods.test.js, test/e2e/foods.spec.js.
 
+## Security fix round 2 (2026-10-22, after grade 85)
+- Framing blocked: early script in docs/index.html stops loading when framed and shows a link; CSP hash updated; test/e2e/framing.spec.js.
+- Rest is Thomas-only: Enforce HTTPS in Pages, admin bypass of branch protection.
+
 ## Decisions
 - Goal is a per-device pref (`fcc:dailyGoal`), not part of the entries blob.
 - Units stay US-only (lbs); kg support not built.

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-DbA5l8XXzuXehWe6ic0nRFvZmfvMV3//6WFqZHjh08g='; img-src 'self' blob: data:; style-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-36soHwkOiaju+r0sZiiKNDnUOH+g+tdGMuv8F5q6rAs='; img-src 'self' blob: data:; style-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Free Calorie Counter</title>
@@ -18,6 +18,20 @@
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <script>
+  // Another site may not frame the app: a transparent frame could trick
+  // taps (clickjacking). GitHub Pages can't send frame-ancestors, so stop
+  // loading and offer a link that opens the app on its own instead.
+  if (window.top !== window.self) {
+    window.stop();
+    var fb = document.createElement('body');
+    var fa = document.createElement('a');
+    fa.href = location.href;
+    fa.target = '_blank';
+    fa.rel = 'noopener';
+    fa.textContent = 'Open Free Calorie Counter in its own tab';
+    fb.appendChild(fa);
+    document.documentElement.appendChild(fb);
+  }
   // Plain http: would let someone on the network alter the app, and is a
   // separate origin with its own data. Send honest visitors to https:.
   if (location.protocol === 'http:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
