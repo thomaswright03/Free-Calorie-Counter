@@ -50,3 +50,4 @@ WebKit job runs in CI only. Rebuild with `npm run build` after editing `docs/` (
 - `/admin/status.json` exception: approved by Thomas 2026-10-21 (REFERENCE.md).
 - Optional: kg setting.
 - Excellence fix round 1 (2026-10-22): status-page Warning wording, empty Today total shows 0, "Set a daily goal" link on Today. Still owner-only: Pages source → GitHub Actions; branch protection for admins.
+- Excellence fix round 2 (2026-10-22): goal link 44px tap area, goal focus via flag in ui/goal.js (no timer), Latest Update rewritten, its unit test compares commit order. All 164 e2e + 88 unit pass in Chromium.
