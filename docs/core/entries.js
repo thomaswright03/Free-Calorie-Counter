@@ -1,11 +1,15 @@
-// A day's entry: its weight and each meal's calorie total. Reading stored
-// days from any version of Free Calorie Counter, applying a change, and the day's totals.
+// A day's entry: its weight and each meal's calorie total, and for a meal
+// logged one food at a time, its foods. Reading stored days from any
+// version of Free Calorie Counter, applying a change, and the day's totals.
 
 /**
  * One day as the app works with it. A meal is its calorie total, or null
- * when it wasn't logged.
- * @typedef {{ date: string, weight: number | null, meals: Record<string, number | null> }} Entry
- * @typedef {{ weight?: number | null, meals?: Record<string, number | null> }} EntryPatch
+ * when it wasn't logged. A meal logged as separate foods also has its list
+ * in `foods` (only meals with foods are there, and `foods` is left out
+ * when no meal has any); its total is always the sum of that list.
+ * @typedef {{ name: string, calories: number }} Food
+ * @typedef {{ date: string, weight: number | null, meals: Record<string, number | null>, foods?: Record<string, Food[]> }} Entry
+ * @typedef {{ weight?: number | null, meals?: Record<string, number | null>, foods?: Record<string, Food[] | null> }} EntryPatch
  */
 'use strict';
 
@@ -48,6 +52,31 @@ function normalizeMealValue(raw) {
   return Number.isFinite(num) ? Math.round(num) : null;
 }
 
+// The longest food name kept, in characters.
+const FOOD_NAME_MAX = 60;
+
+// A meal's list of foods as stored, keeping the foods that can be read (a
+// whole number of calories, a name that's text); null when none can.
+/** @param {unknown} raw @returns {Food[] | null} */
+function normalizeFoods(raw) {
+  if (!Array.isArray(raw)) return null;
+  /** @type {Food[]} */
+  const foods = [];
+  for (const f of raw) {
+    if (!f || typeof f !== 'object') continue;
+    const calories = Number(f.calories);
+    if (typeof f.calories !== 'number' || !Number.isFinite(calories) || calories < 0) continue;
+    const name = typeof f.name === 'string' ? f.name.trim().slice(0, FOOD_NAME_MAX) : '';
+    foods.push({ name, calories: Math.round(calories) });
+  }
+  return foods.length ? foods : null;
+}
+
+/** @param {Food[]} foods */
+function sumFoods(foods) {
+  return foods.reduce((sum, f) => sum + f.calories, 0);
+}
+
 /** @param {unknown} raw @returns {number | null} */
 function normalizeWeight(raw) {
   if (raw === null || raw === undefined || raw === '' || typeof raw === 'boolean') return null;
@@ -77,7 +106,42 @@ function normalizeEntry(date, raw) {
   const meals = emptyMeals();
   const rawMeals = obj.meals && typeof obj.meals === 'object' && !Array.isArray(obj.meals) ? obj.meals : {};
   for (const key of MEAL_KEYS) meals[key] = normalizeMealValue(rawMeals[key]);
-  return { date, weight: normalizeWeight(obj.weight), meals };
+  /** @type {Entry} */
+  const entry = { date, weight: normalizeWeight(obj.weight), meals };
+  const rawFoods = obj.foods && typeof obj.foods === 'object' && !Array.isArray(obj.foods) ? obj.foods : {};
+  for (const key of MEAL_KEYS) setFoods(entry, key, normalizeFoods(rawFoods[key]));
+  return entry;
+}
+
+// Sets one meal's foods, and its total to their sum; null (or an empty
+// list) takes the list away and leaves the meal not logged.
+/** @param {Entry} entry @param {string} key @param {Food[] | null} foods */
+function setFoods(entry, key, foods) {
+  if (foods && foods.length) {
+    entry.foods = { ...entry.foods, [key]: foods.map((f) => ({ ...f })) };
+    entry.meals[key] = sumFoods(foods);
+    return;
+  }
+  if (entry.foods && entry.foods[key]) {
+    entry.meals[key] = null;
+    dropFoods(entry, key);
+  }
+}
+
+// Takes away one meal's list of foods, keeping its total.
+/** @param {Entry} entry @param {string} key */
+function dropFoods(entry, key) {
+  if (!entry.foods || !entry.foods[key]) return;
+  const rest = { ...entry.foods };
+  delete rest[key];
+  if (Object.keys(rest).length) entry.foods = rest;
+  else delete entry.foods;
+}
+
+// One meal's foods, or an empty list for a meal logged as a total.
+/** @param {Entry | null | undefined} entry @param {string} key @returns {Food[]} */
+function mealFoods(entry, key) {
+  return (entry && entry.foods && entry.foods[key]) || [];
 }
 
 // Reads a whole stored entries object, keeping every readable day and
@@ -124,9 +188,11 @@ function totalCalories(meals) {
   return total;
 }
 
-// Applies a partial update ({ weight?, meals?: { key: value } }) to an
-// entry. Only the fields in the patch change, so two screens or tabs
-// editing different meals of the same day never overwrite each other.
+// Applies a partial update ({ weight?, meals?: { key: value }, foods?:
+// { key: list } }) to an entry. Only the fields in the patch change, so two
+// screens or tabs editing different meals of the same day never overwrite
+// each other. A meal's total typed in replaces its foods; a list of foods
+// replaces its total with their sum.
 /**
  * @param {string} date
  * @param {unknown} existing
@@ -139,7 +205,20 @@ function applyPatch(date, existing, patch) {
   if (patch && Object.prototype.hasOwnProperty.call(patch, 'weight')) next.weight = normalizeWeight(patch.weight);
   if (patch && patch.meals && typeof patch.meals === 'object') {
     for (const key of MEAL_KEYS) {
-      if (Object.prototype.hasOwnProperty.call(patch.meals, key)) next.meals[key] = normalizeMealValue(patch.meals[key]);
+      if (!Object.prototype.hasOwnProperty.call(patch.meals, key)) continue;
+      next.meals[key] = normalizeMealValue(patch.meals[key]);
+      dropFoods(next, key);
+    }
+  }
+  if (patch && patch.foods && typeof patch.foods === 'object') {
+    for (const key of MEAL_KEYS) {
+      if (!Object.prototype.hasOwnProperty.call(patch.foods, key)) continue;
+      const foods = normalizeFoods(patch.foods[key]);
+      if (foods) setFoods(next, key, foods);
+      else {
+        next.meals[key] = null;
+        dropFoods(next, key);
+      }
     }
   }
   return next;
@@ -163,8 +242,12 @@ function computeDayStats(entry) {
 module.exports = {
   MEAL_STEPS,
   MEAL_KEYS,
+  FOOD_NAME_MAX,
   emptyMeals,
   normalizeMealValue,
+  normalizeFoods,
+  sumFoods,
+  mealFoods,
   normalizeWeight,
   roundWeight,
   normalizeEntry,

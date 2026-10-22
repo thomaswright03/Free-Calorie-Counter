@@ -12,8 +12,9 @@ import { store } from './store.js';
 import { logHash } from './router.js';
 import { refreshCurrentScreen } from './render.js';
 import { saveDateFor } from './day.js';
+import { foodName } from './log-foods.js';
 
-/** @typedef {{ value: number, date: string, at: number }} Removed a meal removed on this screen: what it was, its day and when */
+/** @typedef {{ value: number, foods: import('../core.js').Food[], date: string, at: number }} Removed a meal removed on this screen: what it was (its total and any foods), its day and when */
 
 // A meal removed this recently when Today is left is offered back on the
 // next screen, for as long as that message shows.
@@ -25,6 +26,14 @@ function dayWords(date) {
   const when = core.formatRelativeDate(date, today());
   return when === 'Today' || when === 'Yesterday' ? when.toLowerCase() : when;
 }
+
+/**
+ * The change that puts a removed meal back: its foods, or its total.
+ * @param {string} key
+ * @param {Removed} r
+ * @returns {import('../core.js').EntryPatch}
+ */
+const putBackPatch = (key, r) => (r.foods.length ? { foods: { [key]: r.foods } } : { meals: { [key]: r.value } });
 
 /**
  * Puts a removed meal back from another screen, unless it has been logged
@@ -39,7 +48,7 @@ async function putBackElsewhere(key, r) {
       toast(`${mealLabel(key)} has been logged again since, so it was left as it is.`);
       return;
     }
-    await store.updateEntry(r.date, { meals: { [key]: r.value } });
+    await store.updateEntry(r.date, putBackPatch(key, r));
   } catch (err) {
     toast(`${mealLabel(key)} not put back. ${notSavedReason(failureText('Put back a meal', err))}`, { tone: 'error' });
     return;
@@ -69,6 +78,7 @@ export function buildMealList(view, where) {
   /** @param {string} key */
   async function removeMeal(key) {
     const previous = view.entry.meals[key];
+    const foods = core.mealFoods(view.entry, key);
     const date = saveDateFor(view);
     try {
       view.entry = await store.updateEntry(date, { meals: { [key]: null } });
@@ -76,7 +86,7 @@ export function buildMealList(view, where) {
       toast(failureText('Remove a meal', err), { tone: 'error' });
       return;
     }
-    if (typeof previous === 'number') removed.set(key, { value: previous, date, at: Date.now() });
+    if (typeof previous === 'number') removed.set(key, { value: previous, foods, date, at: Date.now() });
     refresh();
     focusInRow(key, '[data-undo]');
     announce(`${mealLabel(key)} removed. Undo is next to it.`);
@@ -89,7 +99,7 @@ export function buildMealList(view, where) {
     const previous = r.value;
     button.disabled = true;
     try {
-      view.entry = await store.updateEntry(view.date, { meals: { [key]: previous } });
+      view.entry = await store.updateEntry(view.date, putBackPatch(key, r));
     } catch (err) {
       button.disabled = false;
       toast(failureText('Put back a meal', err), { tone: 'error' });
@@ -106,7 +116,7 @@ export function buildMealList(view, where) {
     const value = view.entry.meals[step.key];
     if (value !== null) removed.delete(step.key);
     const r = removed.get(step.key);
-    return mealRow(step, value, r ? r.value : undefined, {
+    return mealRow(step, value, core.mealFoods(view.entry, step.key), r ? r.value : undefined, {
       href: logHash(where.routeDate, step.key),
       onRemove: () => removeMeal(step.key),
       onUndo: (button) => undoRemove(step.key, button),
@@ -194,21 +204,23 @@ function changedRowFlasher(list, view) {
 /**
  * One meal's row. The whole row, name and value included, opens Log Meal
  * at this meal; a logged meal has a Remove button, and a meal just removed
- * an Undo button.
+ * an Undo button. A meal logged food by food names its foods.
  * @param {{ key: string, label: string }} step
  * @param {number | null} value
+ * @param {import('../core.js').Food[]} foods
  * @param {number | undefined} removedValue what it was, when removed on this screen
  * @param {{ href: string, onRemove: () => void, onUndo: (button: HTMLButtonElement) => void }} actions
  */
-function mealRow(step, value, removedValue, actions) {
+function mealRow(step, value, foods, removedValue, actions) {
   const logged = value !== null;
+  const foodNames = foods.map(foodName).join(', ');
   const shown = logged
     ? h('span', { class: 'meal-value', text: core.formatCalories(value) })
     : h('span', { class: 'meal-empty', text: removedValue !== undefined ? `Removed (was ${core.formatCalories(removedValue)})` : 'Not logged' });
   const link = h(
     'a',
-    { class: 'meal-link', href: actions.href, 'aria-label': logged ? `Edit ${step.label}, ${core.formatCalories(value)}` : `Add ${step.label}` },
-    h('span', { class: 'meal-info' }, h('span', { class: 'meal-name', text: step.label }), shown),
+    { class: 'meal-link', href: actions.href, 'aria-label': logged ? `Edit ${step.label}, ${core.formatCalories(value)}${foodNames ? `: ${foodNames}` : ''}` : `Add ${step.label}` },
+    h('span', { class: 'meal-info' }, h('span', { class: 'meal-name', text: step.label }), shown, foodNames ? h('span', { class: 'meal-foods', text: foodNames }) : null),
     h('span', { class: `meal-go btn-text${logged ? '' : ' btn-quiet'}`, 'aria-hidden': 'true', text: logged ? 'Edit' : 'Add' })
   );
   const buttons = h('div', { class: 'meal-actions' });
