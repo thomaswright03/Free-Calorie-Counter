@@ -19,7 +19,7 @@ WebKit) on the published branch.
 ## Use it on your phone
 
 The app is the `docs/` folder, published by GitHub Pages at
-`https://thomaswright03.github.io/Free-Calorie-Counter/`: no App Store, no server, no
+`https://calories.wright-ai-solutions.com/`: no App Store, no server, no
 account. Anyone with the link can install it; each person's data stays on
 their own phone.
 
