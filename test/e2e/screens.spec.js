@@ -337,25 +337,34 @@ test("today's unfinished day doesn't drag the calorie trend, and is compared as 
   await expect(page.locator('.chart-svg.series-weight .dot-partial')).toHaveCount(0);
 });
 
-test('light and dark themes follow the system and can be overridden', async ({ browser, appURL }) => {
+test('dark is the default theme, and Light or System can be chosen instead', async ({ browser, appURL }) => {
   const light = await browser.newContext({ colorScheme: 'light' });
   const page = await light.newPage();
   await page.goto(appURL);
-  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
-  await page.goto(`${appURL}/#/settings`);
-  await page.locator('label', { hasText: 'Dark' }).click();
-  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
-  await page.reload();
+  // Dark even on a device set to light, until a theme is chosen.
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   const bg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
   expect(bg).toBe('rgb(15, 23, 42)');
-  const scheme = await page.evaluate(() => getComputedStyle(document.querySelector('input[type=radio]')).colorScheme);
+  const scheme = await page.evaluate(() => getComputedStyle(document.body).colorScheme);
   expect(scheme).toBe('dark');
+  expect(await page.locator('meta[name="theme-color"]').first().getAttribute('content')).toBe('#0f172a');
+  await page.goto(`${appURL}/#/settings`);
+  await expect(page.locator('input[type=radio][value="dark"]')).toBeChecked();
+  await page.locator('label', { hasText: 'Light' }).click();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+  await page.reload();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+  await page.locator('label', { hasText: 'System' }).click();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+  await page.reload();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
   await light.close();
 
   const dark = await browser.newContext({ colorScheme: 'dark' });
   const page2 = await dark.newPage();
   await page2.goto(appURL);
+  await page2.evaluate(() => localStorage.setItem('fcc:theme', 'system'));
+  await page2.reload();
   await expect(page2.locator('html')).toHaveAttribute('data-theme', 'dark');
   await dark.close();
 });
