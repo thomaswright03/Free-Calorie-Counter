@@ -29,6 +29,9 @@
   })();
 </script>
 <link rel="stylesheet" href="style.css">
+<!-- Fetch the app script alongside the stylesheet: with the CSP meta tag
+     above, Chromium no longer starts it early on its own. -->
+<link rel="modulepreload" href="build/app.js">
 </head>
 <body>
 <div class="app">

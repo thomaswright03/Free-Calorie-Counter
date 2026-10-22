@@ -11,6 +11,7 @@ import { render } from './render.js';
 import { farBackGate } from './day.js';
 import { buildChartsCard } from './charts.js';
 import { buildBackupReminder } from './backup-reminder.js';
+import { movingTo } from './new-address.js';
 import { buildInstallNote } from './install-note.js';
 import { buildWeightField } from './today-weight.js';
 import { buildMealList } from './today-meals.js';
@@ -115,7 +116,9 @@ export async function buildToday(ctx) {
   // At most one card above the day, so logging stays in reach. The Home
   // Screen note wins: it already says to back up first. The backup
   // reminder shows once the note is hidden or doesn't apply.
-  const installNote = buildInstallNote(hasData, () => {
+  // At the old address the moving notice comes first: installing there
+  // would only have to be undone.
+  const installNote = movingTo() ? null : buildInstallNote(hasData, () => {
     const next = buildBackupReminder(hasData);
     if (!next) return;
     root.prepend(next.root);

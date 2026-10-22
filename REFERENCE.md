@@ -381,7 +381,18 @@ before merging*, and select both checks.
 
 ### Shared origin risk
 
-The app currently shares the origin `thomaswright03.github.io` with other Pages sites on the account (e.g. `/Kenna/`). Storage is per origin, so scripts there could read this app's data. Don't add Pages sites to the account; the fix is a custom domain (`docs/CNAME`) plus a move-your-data notice. See SECURITY.md.
+The app currently shares the origin `thomaswright03.github.io` with other Pages sites on the account. Storage is per origin, so scripts there could read this app's data. Don't add Pages sites to the account until the move below is done. See SECURITY.md.
+
+### Moving to the new address
+
+The app is moving to its own origin, `https://calories.wrightaisolutions.com/` (`NEW_ADDRESS` in `docs/ui/new-address.js`). Browser data stays with the old address, so:
+
+1. **Already live:** at the old address, Today shows "Free Calorie Counter is moving to calories.wrightaisolutions.com" in place of the backup reminder (and the Home Screen note) for anyone with saved data, until they save a backup there. "Not now" snoozes it like the reminder.
+2. **Owner, DNS:** where wrightaisolutions.com is managed, add a `CNAME` record: name `calories`, value `thomaswright03.github.io`.
+3. **Owner, once people have saved their backup:** Settings → Pages → Custom domain: `calories.wrightaisolutions.com` → Save, wait for the DNS check, then tick *Enforce HTTPS*. GitHub then redirects the old address to the new one, so the old copy can no longer be opened: step 1 has to come first.
+4. **At the new address:** open it in Safari, add it to the Home Screen, then Settings → Import Backup. Remove the old Home Screen icon.
+
+With the Actions deploy the custom domain is set in Settings, not by a `docs/CNAME` file.
 
 ### Where the app is published
 
