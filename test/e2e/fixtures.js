@@ -42,6 +42,15 @@ function startCoverage(page) {
   };
 }
 
+// Makes every page in the context look opened from the Home Screen. A new
+// user in a phone's browser tab only sees the Home Screen step, so contexts a
+// test makes itself call this too.
+async function openFromHomeScreen(context) {
+  await context.addInitScript(() => {
+    Object.defineProperty(Navigator.prototype, 'standalone', { get: () => true, configurable: true });
+  });
+}
+
 const test = base.test.extend({
   // Free Calorie Counter opened from the Home Screen, as it's meant to be used. Tests of
   // the browser-tab note set this to false.
@@ -72,11 +81,7 @@ const test = base.test.extend({
   page: async ({ page, context, installed, whatsNewSeen }, use, testInfo) => {
     const coverage = startCoverage(page);
     await page.clock.setFixedTime(NOW);
-    if (installed) {
-      await context.addInitScript(() => {
-        Object.defineProperty(Navigator.prototype, 'standalone', { get: () => true, configurable: true });
-      });
-    }
+    if (installed) await openFromHomeScreen(context);
     if (whatsNewSeen) {
       await context.addInitScript((version) => {
         try {
@@ -124,4 +129,4 @@ function day(date, meals = {}, weight = null) {
   };
 }
 
-module.exports = { test, expect: base.expect, TODAY, NOW, day, WHATS_NEW_VERSION };
+module.exports = { test, openFromHomeScreen, expect: base.expect, TODAY, NOW, day, WHATS_NEW_VERSION };

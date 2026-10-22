@@ -8,7 +8,8 @@ test.use({ installed: false });
 const note = (page) => page.locator('[data-install-note]');
 
 test.describe('phone version in a Safari tab', () => {
-  test('Today says iPhone may delete the data and gives the Home Screen steps', async ({ page, appURL }) => {
+  test('Today says iPhone may delete the data and gives the Home Screen steps', async ({ page, appURL, data }) => {
+    await data.seed({ [TODAY]: day(TODAY, { breakfast: 400 }) });
     await page.goto(appURL);
     await expect(note(page)).toBeVisible();
     await expect(note(page).getByText('Add Free Calorie Counter to your Home Screen')).toBeVisible();
@@ -19,17 +20,16 @@ test.describe('phone version in a Safari tab', () => {
     await expect(note(page).locator('li').first()).toBeVisible();
     const steps = await note(page).locator('li').allTextContents();
     expect(steps).toEqual([
-      'Tap the Share button (the square with an arrow) in Safari’s toolbar.',
-      'Tap Add to Home Screen, then Add.',
+      'Tap the Share button (the square with an arrow) in Safari’s toolbar. Don’t see it? Tap ••• first.',
+      'Tap Add to Home Screen (scroll down if you don’t see it), then Add.',
       'From now on, open Free Calorie Counter from its new icon.',
     ]);
-    // Nothing logged yet, so there's nothing to carry over.
-    await expect(note(page).getByRole('link', { name: 'Back up first' })).toHaveCount(0);
     const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'best-practice']).analyze();
     expect(results.violations.map((v) => v.id)).toEqual([]);
   });
 
-  test('the card’s rows are evenly spaced, with no gap before its buttons', async ({ page, appURL }) => {
+  test('the card’s rows are evenly spaced, with no gap before its buttons', async ({ page, appURL, data }) => {
+    await data.seed({ [TODAY]: day(TODAY, { breakfast: 400 }) });
     await page.goto(appURL);
     await expect(note(page)).toBeVisible();
     const gaps = await note(page).evaluate((card) => {
@@ -38,7 +38,8 @@ test.describe('phone version in a Safari tab', () => {
         range.selectNodeContents(el);
         return range.getBoundingClientRect();
       };
-      const why = textBox(card.querySelectorAll('.notice-text')[0]);
+      const texts = card.querySelectorAll('.notice-text');
+      const why = textBox(texts[texts.length - 1]);
       const how = textBox(card.querySelector('summary'));
       const button = card.querySelector('.notice-actions .btn').getBoundingClientRect();
       return { above: how.top - why.bottom, below: button.top - how.bottom };
@@ -56,7 +57,8 @@ test.describe('phone version in a Safari tab', () => {
     await expect(page.getByRole('heading', { name: 'Settings' })).toBeVisible();
   });
 
-  test('Not now hides it for a week, then it comes back', async ({ page, appURL }) => {
+  test('Not now hides it for a week, then it comes back', async ({ page, appURL, data }) => {
+    await data.seed({ [TODAY]: day(TODAY, { breakfast: 400 }) });
     await page.goto(appURL);
     await note(page).getByRole('button', { name: 'Not now' }).click();
     await expect(note(page)).toHaveCount(0);
@@ -72,8 +74,11 @@ test.describe('phone version in a Safari tab', () => {
     await expect(note(page)).toBeVisible();
   });
 
-  test('Settings explains the risk and repeats the steps', async ({ page, appURL }) => {
+  test('Settings explains the risk and repeats the steps', async ({ page, appURL, data }) => {
+    await data.seed({ [TODAY]: day(TODAY, { breakfast: 400 }) });
+    // Seeding left the page on the new-user Home Screen step; only a hash differs, so reload.
     await page.goto(`${appURL}/#/settings`);
+    await page.reload();
     await expect(page.getByText('Safari may delete a website’s data, Free Calorie Counter’s included, when it hasn’t been used for about a week')).toBeVisible();
     await expect(page.locator('[data-install-steps]')).toContainText('You’re using Free Calorie Counter in a Safari tab');
     await expect(page.locator('[data-install-steps] li')).toHaveCount(3);
@@ -105,7 +110,8 @@ test.describe('phone version in a Safari tab', () => {
 test.describe('not on an iPhone', () => {
   test.use({ userAgent: 'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Mobile Safari/537.36' });
 
-  test('on Android there is no note', async ({ page, appURL }) => {
+  test('on Android, someone with days logged gets no note', async ({ page, appURL, data }) => {
+    await data.seed({ [TODAY]: day(TODAY, { breakfast: 400 }) });
     await page.goto(appURL);
     await expect(page.getByLabel('Weight (lbs)')).toBeVisible();
     await expect(note(page)).toHaveCount(0);

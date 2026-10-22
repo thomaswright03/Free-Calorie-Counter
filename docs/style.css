@@ -1014,6 +1014,107 @@ body.is-touring { padding-bottom: 100vh; }
 .install-steps { margin: var(--s2) 0; padding-left: var(--s5); font-size: var(--fs-sm); }
 .install-steps li { margin-bottom: var(--s1); }
 
+/* A new user's first screen on a phone, until the app is on the Home
+   Screen: a walkthrough, one step per slide, and nothing else in the app
+   is reachable. The slides share one grid cell, so the card is as tall as
+   the tallest and doesn't jump between steps. */
+body.is-install-gate .tabs,
+body.is-install-gate .settings-link { display: none; }
+.walk { overflow: hidden; text-align: center; }
+.walk-viewport { display: grid; touch-action: pan-y; }
+.walk-slide { grid-area: 1 / 1; display: flex; flex-direction: column; align-items: center; }
+.walk-slide:not(.is-active) { visibility: hidden; }
+.walk-count { margin: var(--s4) 0 var(--s1); font-size: var(--fs-sm); font-weight: 700; color: var(--accent-text); text-transform: uppercase; letter-spacing: 0.06em; }
+.walk-title { margin: 0 0 var(--s2); font-size: var(--fs-lg); line-height: 1.25; outline: none; }
+.walk-text { margin: 0; color: var(--muted); max-width: 34ch; }
+.walk-dots { display: flex; justify-content: center; gap: var(--s2); margin-top: var(--s5); }
+.walk-dot { width: 8px; height: 8px; border-radius: var(--r-pill); background: var(--border); }
+.walk-dot.is-past { background: color-mix(in srgb, var(--accent) 45%, var(--border)); }
+.walk-dot.is-on { width: 24px; background: var(--accent); }
+.walk-nav { display: grid; grid-template-columns: 1fr 2fr; gap: var(--s3); }
+.walk-nav > :only-child,
+.walk-nav > [hidden] + .btn { grid-column: 1 / -1; }
+.walk-done:empty { display: none; }
+.walk-done { margin: var(--s3) 0 0; font-weight: 700; color: var(--accent-text); }
+.walk-foot { margin: var(--s4) 0 0; font-size: var(--fs-sm); color: var(--muted); }
+
+/* The pictures: drawn with plain boxes, in the app's colors. */
+.walk-art { position: relative; width: 220px; height: 170px; flex-shrink: 0; }
+.walk-art-welcome { display: grid; place-items: center; }
+.walk-hero-icon { position: relative; width: 112px; height: 112px; border-radius: 26px; box-shadow: var(--shadow); }
+.walk-glow { position: absolute; width: 150px; height: 150px; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--accent) 40%, transparent), transparent 70%); }
+.walk-phone {
+  border: 3px solid var(--text);
+  border-radius: 28px;
+  background: var(--card-2);
+  overflow: hidden;
+  font-size: 11px;
+  color: var(--text);
+}
+.walk-phone-bottom { border-top: none; border-top-left-radius: 0; border-top-right-radius: 0; }
+.walk-phone-sheet,
+.walk-phone-top { border-bottom: none; border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+.walk-page-lines { position: absolute; inset: 18px 18px auto; display: grid; gap: 8px; }
+.walk-phone-top .walk-page-lines { top: 56px; }
+.walk-page-lines > span { height: 8px; border-radius: 4px; background: var(--border); }
+.walk-page-lines > span:nth-child(2) { width: 70%; }
+.walk-page-lines > span:nth-child(3) { width: 85%; }
+.walk-address {
+  display: block;
+  padding: 6px 10px;
+  border-radius: var(--r-pill);
+  background: var(--card);
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.walk-phone-bottom .walk-address { position: absolute; left: 12px; right: 12px; bottom: 56px; }
+.walk-toolbar { position: absolute; left: 0; right: 0; bottom: 0; height: 50px; display: flex; justify-content: space-around; align-items: center; background: var(--card); border-top: 1px solid var(--border); }
+.walk-tool { position: relative; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; font-size: 15px; font-weight: 700; color: var(--muted); }
+.walk-tool.is-target { color: var(--on-accent); background: var(--accent); }
+.walk-topbar { position: absolute; left: 0; right: 0; top: 0; display: flex; align-items: center; gap: 6px; padding: 8px 8px 8px 12px; background: var(--card); border-bottom: 1px solid var(--border); }
+.walk-topbar .walk-address { flex: 1; min-width: 0; background: var(--card-2); }
+.walk-kebab { font-size: 18px; }
+.walk-sheet,
+.walk-menu { position: absolute; display: flex; flex-direction: column; background: var(--card); box-shadow: var(--shadow); }
+.walk-sheet { left: 0; right: 0; bottom: 0; top: 22px; border-radius: 18px 18px 0 0; padding: 10px; gap: 6px; }
+.walk-menu { right: 8px; top: 40px; width: 150px; border-radius: 12px; padding: 4px 0; }
+.walk-sheet-head { display: flex; align-items: center; gap: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border); font-weight: 700; text-align: left; }
+.walk-sheet-icon { width: 26px; height: 26px; border-radius: 7px; }
+.walk-sheet-name { flex: 1; }
+.walk-add { padding: 3px 10px; border-radius: var(--r-pill); color: var(--on-accent); background: var(--accent); }
+.walk-row { position: relative; display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; border-radius: 8px; background: var(--card-2); text-align: left; }
+.walk-menu .walk-row { background: none; border-radius: 0; }
+.walk-row.is-target { color: var(--accent-text); background: var(--accent-soft); font-weight: 700; }
+.walk-row-dot { width: 14px; height: 14px; border-radius: 4px; background: var(--border); }
+.walk-tap { position: absolute; top: 50%; left: 50%; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%; border: 3px solid var(--focus); pointer-events: none; opacity: 0; }
+.walk-row .walk-tap { left: auto; right: 2px; }
+.walk-home { display: flex; flex-direction: column; justify-content: space-between; padding: 14px 18px 8px; border-radius: 28px; background: linear-gradient(160deg, color-mix(in srgb, var(--accent) 35%, var(--card-2)), color-mix(in srgb, var(--chart-weight) 30%, var(--card-2))); }
+.walk-grid,
+.walk-dock { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; justify-items: center; }
+.walk-dock { padding: 6px; border-radius: 16px; background: color-mix(in srgb, var(--card) 45%, transparent); }
+.walk-slot { width: 32px; height: 32px; border-radius: 9px; background: color-mix(in srgb, var(--card) 70%, transparent); }
+.walk-new { position: relative; width: 32px; height: 32px; }
+.walk-new-icon { width: 32px; height: 32px; border-radius: 9px; box-shadow: var(--shadow-sm); }
+.walk-video {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s2);
+  width: 260px;
+  height: 160px;
+  padding: var(--s3);
+  border-radius: var(--r-lg);
+  border: 2px dashed var(--border);
+  background: linear-gradient(150deg, var(--card-2), color-mix(in srgb, var(--accent) 18%, var(--card-2)));
+}
+.walk-play { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; color: var(--on-accent); background: var(--accent); box-shadow: var(--shadow); }
+.walk-play svg { margin-left: 3px; }
+.walk-video-text { font-size: var(--fs-sm); font-weight: 600; color: var(--muted); }
+.walk-sparks > span { position: absolute; top: 50%; left: 50%; width: 6px; height: 6px; margin: -3px; border-radius: 50%; background: var(--warning-border); opacity: 0; }
+
 /* A day far back enough that its year was probably mistyped, and other
    notes inside a card. */
 .far-back,
@@ -1255,6 +1356,100 @@ html {
     from { opacity: 0; transform: translate3d(var(--enter-x, 0), 14px, 0) scale(0.985); }
     to { opacity: 1; transform: none; }
   }
+  /* ---- the Home Screen walkthrough: slides glide in from the side
+     they're coming from, the dots stretch to the step, and each picture
+     acts out its tap once its slide is in view. */
+  .walk-slide { transition: opacity var(--dur) var(--ease-out), transform var(--dur-slow) var(--ease-out), visibility 0s linear var(--dur); }
+  .walk-slide[data-side='before'] { opacity: 0; transform: translate3d(-48px, 0, 0) scale(0.96); }
+  .walk-slide[data-side='after'] { opacity: 0; transform: translate3d(48px, 0, 0) scale(0.96); }
+  .walk-slide.is-active { transition-delay: 0s; }
+  .walk-slide.is-active > :not(.walk-art) { animation: walk-rise var(--dur-slow) var(--ease-out) both; }
+  .walk-slide.is-active > .walk-count { animation-delay: 60ms; }
+  .walk-slide.is-active > .walk-title { animation-delay: 120ms; }
+  .walk-slide.is-active > .walk-text { animation-delay: 180ms; }
+  @keyframes walk-rise {
+    from { opacity: 0; transform: translate3d(0, 12px, 0); }
+    to { opacity: 1; transform: none; }
+  }
+  .walk-dot { transition: width var(--dur) var(--ease-spring), background-color var(--dur) ease; }
+
+  /* Welcome: the icon floats on a breathing glow. */
+  .walk-slide.is-active .walk-hero-icon { animation: walk-pop var(--dur-slow) var(--ease-spring) both, walk-float 3.2s ease-in-out 0.6s infinite; }
+  .walk-slide.is-active .walk-glow { animation: walk-breathe 3.2s ease-in-out infinite; }
+  @keyframes walk-pop {
+    from { opacity: 0; transform: scale(0.6) rotate(-8deg); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes walk-float {
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    50% { transform: translate3d(0, -8px, 0); }
+  }
+  @keyframes walk-breathe {
+    0%, 100% { opacity: 0.55; transform: scale(0.9); }
+    50% { opacity: 1; transform: scale(1.08); }
+  }
+
+  /* The mission video's play button pulses, waiting to be pressed. */
+  .walk-slide.is-active .walk-video { animation: walk-phone-in var(--dur-slow) var(--ease-out) both; }
+  .walk-slide.is-active .walk-play { animation: walk-pop var(--dur-slow) var(--ease-spring) 0.2s both, walk-glow-pulse 2s ease-in-out 1s infinite; }
+
+  /* The phone pictures rise in, then the tap lands and ripples. */
+  .walk-slide.is-active .walk-phone { animation: walk-phone-in var(--dur-slow) var(--ease-out) both; }
+  @keyframes walk-phone-in {
+    from { opacity: 0; transform: translate3d(0, 24px, 0); }
+    to { opacity: 1; transform: none; }
+  }
+  .walk-slide.is-active .walk-tool.is-target,
+  .walk-slide.is-active .walk-row.is-target { animation: walk-press 2s var(--ease-in-out) 0.7s infinite; }
+  .walk-slide.is-active .walk-tap { animation: walk-ripple 2s var(--ease-out) 0.7s infinite; }
+  @keyframes walk-press {
+    0%, 30%, 100% { transform: none; }
+    15% { transform: scale(0.9); }
+  }
+  @keyframes walk-ripple {
+    0% { opacity: 0.9; transform: scale(0.4); }
+    60%, 100% { opacity: 0; transform: scale(2.6); }
+  }
+  /* The share sheet and the menu slide out of the button that opens them. */
+  .walk-slide.is-active .walk-sheet { animation: walk-sheet-up var(--dur-slow) var(--ease-out) 0.2s both; }
+  .walk-slide.is-active .walk-menu { transform-origin: top right; animation: walk-menu-open var(--dur) var(--ease-spring) 0.25s both; }
+  .walk-slide.is-active .walk-add { animation: walk-glow-pulse 2s ease-in-out 1s infinite; }
+  @keyframes walk-sheet-up {
+    from { transform: translate3d(0, 100%, 0); }
+    to { transform: none; }
+  }
+  @keyframes walk-menu-open {
+    from { opacity: 0; transform: scale(0.6); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes walk-glow-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 60%, transparent); }
+    50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 0%, transparent); }
+  }
+
+  /* The Home Screen: the other icons settle, then the new one drops in
+     with a bounce and a burst of sparkles, and keeps a gentle wiggle. */
+  .walk-slide.is-active .walk-slot { animation: walk-rise var(--dur) var(--ease-out) both; }
+  .walk-slide.is-active .walk-new-icon { animation: walk-drop 0.7s var(--ease-spring) 0.45s both, walk-wiggle 2.8s ease-in-out 1.6s infinite; }
+  .walk-slide.is-active .walk-sparks > span { animation: walk-spark 0.8s var(--ease-out) 0.9s both; }
+  .walk-sparks > span:nth-child(1) { --sx: -22px; --sy: -20px; }
+  .walk-sparks > span:nth-child(2) { --sx: 22px; --sy: -20px; }
+  .walk-sparks > span:nth-child(3) { --sx: -22px; --sy: 20px; }
+  .walk-sparks > span:nth-child(4) { --sx: 22px; --sy: 20px; }
+  @keyframes walk-drop {
+    from { opacity: 0; transform: translate3d(0, -60px, 0) scale(0.4); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes walk-wiggle {
+    0%, 88%, 100% { transform: none; }
+    92% { transform: rotate(-6deg); }
+    96% { transform: rotate(6deg); }
+  }
+  @keyframes walk-spark {
+    0% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+    100% { opacity: 0; transform: translate3d(var(--sx), var(--sy), 0) scale(0.3); }
+  }
+
   /* The tour measures where things are, so screens open in place under it. */
   body.is-touring .view-enter.screen-stack > *,
   body.is-touring .view-enter:not(.screen-stack) { animation: none; }

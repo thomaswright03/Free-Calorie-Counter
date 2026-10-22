@@ -1,4 +1,4 @@
-const { test, expect, TODAY, day } = require('./fixtures');
+const { test, expect, TODAY, day, openFromHomeScreen } = require('./fixtures');
 
 const nav = (page) => page.getByRole('navigation', { name: 'Main' });
 const ISO_DATE = /\d{4}-\d{2}-\d{2}/;
@@ -339,6 +339,7 @@ test("today's unfinished day doesn't drag the calorie trend, and is compared as 
 
 test('dark is the default theme, and Light or System can be chosen instead', async ({ browser, appURL }) => {
   const light = await browser.newContext({ colorScheme: 'light' });
+  await openFromHomeScreen(light);
   const page = await light.newPage();
   await page.goto(appURL);
   // Dark even on a device set to light, until a theme is chosen.
@@ -361,6 +362,8 @@ test('dark is the default theme, and Light or System can be chosen instead', asy
   await light.close();
 
   const dark = await browser.newContext({ colorScheme: 'dark' });
+
+  await openFromHomeScreen(dark);
   const page2 = await dark.newPage();
   await page2.goto(appURL);
   await page2.evaluate(() => localStorage.setItem('fcc:theme', 'system'));
