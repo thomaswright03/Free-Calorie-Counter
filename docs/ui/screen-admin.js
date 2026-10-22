@@ -99,7 +99,7 @@ function allChecks() {
     run('key', 'Offline cache', async () => {
       if (!('serviceWorker' in navigator) || !window.caches) return { status: 'unknown', detail: 'This browser or address doesn’t support offline caching.' };
       const reg = await navigator.serviceWorker.getRegistration();
-      if (!reg) return { status: 'warning', detail: 'The offline helper isn’t registered yet; it is after the first full load.' };
+      if (!reg) return { status: 'warning', detail: 'Offline use isn’t set up yet; it turns on after the app finishes loading once, so reopen this page in a minute.' };
       const [name, keys] = await Promise.all([buildCacheName(), window.caches.keys()]);
       if (!name) return { status: 'down', detail: 'The build’s cache name could not be read.' };
       return keys.includes(name)
@@ -126,7 +126,7 @@ function allChecks() {
     run('basic', 'Storage persistence', async () => {
       const p = await store.persistenceStatus();
       if (p === null) return { status: 'unknown', detail: 'This browser can’t say.' };
-      return p ? { status: 'ok', detail: 'Granted: the browser keeps the data when space is low.' } : { status: 'warning', detail: 'Not granted: the browser may clear data when space is low.' };
+      return p ? { status: 'ok', detail: 'Granted: the browser keeps the data when space is low.' } : { status: 'warning', detail: 'The browser hasn’t promised to keep your data; add Free Calorie Counter to your Home Screen and export a backup regularly.' };
     }),
     run('basic', 'Build and version', async () => {
       const name = await buildCacheName();

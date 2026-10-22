@@ -49,3 +49,4 @@ WebKit job runs in CI only. Rebuild with `npm run build` after editing `docs/` (
 - Lawyer review: done and approved per the owner (2026-10-20); the owner says reviewer name and date are not needed (2026-10-21), so don't ask again. Contact email set; operator set to Wright AI Solutions (confirmed by the owner, 2026-10-21).
 - `/admin/status.json` exception: approved by Thomas 2026-10-21 (REFERENCE.md).
 - Optional: kg setting.
+- Excellence fix round 1 (2026-10-22): status-page Warning wording, empty Today total shows 0, "Set a daily goal" link on Today. Still owner-only: Pages source → GitHub Actions; branch protection for admins.

@@ -473,6 +473,8 @@ input.visually-hidden:focus-visible + .file-btn { outline: 3px solid var(--focus
 
 .total-label { color: var(--muted); font-size: var(--fs-sm); }
 .total-goal { margin-top: var(--s2); font-size: var(--fs-sm); font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
+.set-goal-link { display: inline-block; margin-top: var(--s2); font-size: var(--fs-sm); color: var(--muted); text-decoration: underline; }
+.set-goal-link[hidden] { display: none; }
 .total-goal.is-over { color: var(--danger); }
 
 .meal-list { list-style: none; margin: 0; padding: 0; }

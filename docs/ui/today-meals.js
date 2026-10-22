@@ -3,7 +3,7 @@
 // Undo button in its row while the screen is open, and if the screen is
 // left soon after, the next screen offers Undo for a few seconds more.
 
-import { showGoalLine, showGoalMeter } from './goal.js';
+import { getGoal, showGoalLine, showGoalMeter } from './goal.js';
 import { countTo, replay } from './motion.js';
 import { core, h, MEAL_STEPS, mealLabel, today, notSavedReason } from './dom.js';
 import { failureText } from './problems.js';
@@ -149,13 +149,18 @@ function buildTotal(view, where) {
   const num = h('div', { class: 'total-num' });
   const label = h('div', { class: 'total-label' });
   const goalLine = h('div', { class: 'total-goal', 'data-goal-progress': '' });
+  const setGoalLink = h('a', { class: 'set-goal-link', href: '#/settings', text: 'Set a daily goal' });
+  setGoalLink.addEventListener('click', () => {
+    // Once Settings has drawn, put the cursor in the goal field.
+    setTimeout(() => /** @type {HTMLElement | null} */ (document.querySelector('[data-goal-card] input'))?.focus(), 150);
+  });
   const meter = h('div', { class: 'goal-meter is-fresh', 'aria-hidden': 'true' }, h('span', { class: 'goal-meter-fill' }));
   // The bar fills from empty when the screen opens, then glides on each change.
   setTimeout(() => meter.classList.remove('is-fresh'), 1200);
   let shown = 0;
   function refresh() {
     const total = core.totalCalories(view.entry.meals);
-    if (total === null) num.textContent = '—';
+    if (total === null) num.textContent = '0';
     else countTo(num, shown, total, core.formatNumber);
     shown = total === null ? 0 : total;
     const when = where.isToday ? 'today' : core.formatDate(view.date, today());
@@ -163,8 +168,9 @@ function buildTotal(view, where) {
       total === null ? `No meals logged ${where.isToday ? 'yet today' : `for ${when}`}` : `calories logged ${where.isToday ? 'today' : `on ${when}`}`;
     showGoalLine(goalLine, total);
     showGoalMeter(meter, total);
+    setGoalLink.hidden = getGoal() !== null;
   }
-  return { el: h('div', { class: 'total-box' }, num, label, goalLine, meter), refresh };
+  return { el: h('div', { class: 'total-box' }, num, label, goalLine, setGoalLink, meter), refresh };
 }
 
 /**
