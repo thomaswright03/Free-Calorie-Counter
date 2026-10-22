@@ -8,11 +8,13 @@ const core = require('../../docs/core.js');
 const docs = path.join(__dirname, '..', '..', 'docs');
 
 test('every page has a Content-Security-Policy whose script hashes match its inline scripts', () => {
-  for (const name of fs.readdirSync(docs).filter((f) => f.endsWith('.html'))) {
+  const pages = [...fs.readdirSync(docs).filter((f) => f.endsWith('.html')), 'admin/index.html'];
+  for (const name of pages) {
     const html = fs.readFileSync(path.join(docs, name), 'utf8');
     const csp = html.match(/http-equiv="Content-Security-Policy" content="([^"]+)"/);
     assert.ok(csp, `${name} has no CSP`);
     assert.match(csp[1], /object-src 'none'/);
+    assert.match(html, /<meta name="referrer" content="no-referrer">/, `${name} has no referrer policy`);
     for (const [, body] of html.matchAll(/<script>([\s\S]*?)<\/script>/g)) {
       const hash = `'sha256-${crypto.createHash('sha256').update(body).digest('base64')}'`;
       assert.ok(csp[1].includes(hash), `${name}: inline script hash ${hash} missing from CSP`);

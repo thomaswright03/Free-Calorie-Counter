@@ -19,6 +19,8 @@
   'use strict';
 
   const CHUNK_BYTES = 1024 * 1024;
+  /** Backups bigger than this are refused before reading, so a wrong file can't exhaust the tab's memory. */
+  const MAX_BACKUP_BYTES = 200 * 1024 * 1024;
 
   // ------------------------------------------------------------ writing
 
@@ -267,6 +269,7 @@
    * @returns {Promise<{ top: Record<string, unknown>, photosIsArray: boolean }>}
    */
   async function scanBackup(blob, onPhoto) {
+    if (blob.size > MAX_BACKUP_BYTES) throw new BackupFormatError('file too large');
     const scanner = createScanner(['photos']);
     let n = 0;
     await readInSlices(blob, async (text) => {
