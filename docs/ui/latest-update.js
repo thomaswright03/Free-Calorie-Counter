@@ -15,5 +15,6 @@ export const LATEST_UPDATE = {
     'Each food has a remove button, with Undo for a few seconds; a food typed but not added yet is added when you tap Save and close.',
     'Today: a meal logged food by food lists its foods under its total.',
     'Backups include each meal’s foods, and backups made before this still import.',
+    'The privacy page now gives the app’s own address, calories.wright-ai-solutions.com.',
   ],
 };
