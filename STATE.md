@@ -51,3 +51,4 @@ WebKit job runs in CI only. Rebuild with `npm run build` after editing `docs/` (
 - Optional: kg setting.
 - Excellence fix round 1 (2026-10-22): status-page Warning wording, empty Today total shows 0, "Set a daily goal" link on Today. Still owner-only: Pages source → GitHub Actions; branch protection for admins.
 - Excellence fix round 2 (2026-10-22): goal link 44px tap area, goal focus via flag in ui/goal.js (no timer), Latest Update rewritten, its unit test compares commit order. All 164 e2e + 88 unit pass in Chromium.
+- Security fix round 1 (2026-10-22, grade 82): meta CSP on all 4 pages (unit test checks inline-script hashes, test/unit/security.test.js); Actions pinned to SHAs; SECURITY.md + .github/dependabot.yml; backup photo types allow-listed (no SVG); Settings "Delete all my data…" (store.eraseAll, test/e2e/erase-all.spec.js). Still owner-only: Pages source, admin bypass.

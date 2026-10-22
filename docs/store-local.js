@@ -48,6 +48,7 @@
  * @property {() => Promise<{ add: (photo: BackupPhoto) => Promise<Photo | null> }>} createPhotoImporter adds backup photos one at a time; `add` resolves null for a photo that's already here
  * @property {() => Promise<DamagedCopy[]>} damagedCopies copies of stored data that were found damaged, newest first
  * @property {() => Promise<void>} deleteDamagedCopies
+ * @property {() => Promise<void>} eraseAll removes every `fcc:` setting and entry from localStorage and deletes both photo databases
  * @property {() => Promise<boolean | null>} requestPersistence
  * @property {() => Promise<boolean | null>} persistenceStatus
  * @property {(callback: () => void) => void} onExternalChange
@@ -204,6 +205,40 @@
         for (const k of corruptKeys()) storage.removeItem(k.key);
       } catch (e) {
         throw new StorageWriteError("Free Calorie Counter couldn't delete the damaged data. Close Free Calorie Counter completely, open it again and try once more.", { cause: e });
+      }
+    }
+
+    async function eraseAll() {
+      try {
+        const keys = [];
+        for (let i = 0; i < storage.length; i++) {
+          const k = storage.key(i);
+          if (k !== null && k.startsWith('fcc:')) keys.push(k);
+        }
+        for (const k of keys) storage.removeItem(k);
+      } catch (e) {
+        throw new StorageWriteError("Free Calorie Counter couldn't erase your saved days. Close Free Calorie Counter completely, open it again and try once more.", { cause: e });
+      }
+      const factory = idb;
+      if (!factory) return;
+      /** @param {string} name @param {() => Promise<IDBDatabase>} open */
+      const dropDb = async (name, open) => {
+        try {
+          (await open()).close();
+        } catch {
+          // Nothing to close if it never opened.
+        }
+        await new Promise((resolve, reject) => {
+          const req = factory.deleteDatabase(name);
+          req.onsuccess = () => resolve(undefined);
+          req.onerror = () => reject(req.error);
+        });
+      };
+      try {
+        await dropDb(PHOTOS_DB_NAME, openPhotosDB);
+        await dropDb(INDEX_DB_NAME, openIndexDB);
+      } catch (e) {
+        throw new StorageWriteError("Free Calorie Counter couldn't erase your photos. Close Free Calorie Counter completely, open it again and try once more.", { cause: e });
       }
     }
 
@@ -660,6 +695,7 @@
       undoImport,
       damagedCopies,
       deleteDamagedCopies,
+      eraseAll,
       // Every photo operation fails with a Free Calorie Counter sentence, never the
       // browser's own error text.
       listPhotos: () => guardPhotos('list', listPhotos),

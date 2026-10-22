@@ -85,7 +85,7 @@ function checkBackupPhoto(p, n) {
   if (typeof p.createdAt !== 'string' || Number.isNaN(Date.parse(p.createdAt))) {
     return { ok: false, error: `Photo ${n} has no valid upload time.` };
   }
-  if (typeof p.type !== 'string' || !/^image\/[\w.+-]+$/.test(p.type)) return { ok: false, error: `Photo ${n} isn't an image.` };
+  if (typeof p.type !== 'string' || !/^image\/(jpeg|png|webp|gif|heic|heif)$/.test(p.type)) return { ok: false, error: `Photo ${n} isn't an image.` };
   if (typeof p.data !== 'string' || p.data.length === 0 || !/^[A-Za-z0-9+/]+=*$/.test(p.data)) {
     return { ok: false, error: `Photo ${n}'s image data is damaged.` };
   }

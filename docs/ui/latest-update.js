@@ -7,12 +7,10 @@
 export const LATEST_UPDATE = {
   date: '2026-10-22',
   summary:
-    'This round tidied Today and the App status page. Today now shows 0 for a day with nothing logged, and offers a Set a daily goal link when you have no goal yet. The status page explains its warnings more clearly. The link is now big enough to tap easily, and it reliably puts the cursor in the goal field.',
+    'This round is about keeping your data safe. You can now delete everything the app saved on your phone from Settings, and the app blocks scripts from anywhere else. Backups can only bring back normal photo types.',
   /** What you can see in the app, listed first. */
   frontend: [
-    'Today: a “Set a daily goal” link appears under the total when no goal is set. It opens Settings with the goal field ready to type in.',
-    'The “Set a daily goal” link has a large tap area (at least 44 by 44 pixels), so it is easy to hit on a phone.',
-    'Today: a day with nothing logged now shows 0 instead of a dash.',
-    'Settings › App status: the “Offline cache” and “Storage persistence” warnings now say plainly what is wrong and what it means.',
+    'Settings: a new “Delete all my data…” button removes every day, goal, setting and photo from this browser, after you confirm.',
+    'Restoring a backup now only accepts photos in common image types (JPEG, PNG, WebP, GIF, HEIC); other files are rejected as not an image.',
   ],
 };

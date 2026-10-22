@@ -66,7 +66,7 @@ export async function buildSettings() {
   const damaged = await buildDamagedDataCard();
   return {
     title: 'Settings',
-    root: h('div', { class: 'screen-stack two-col' }, h('div', { class: 'screen-stack' }, appearance, buildGoalCard(), buildBackupSection(), whatsNew), h('div', { class: 'screen-stack' }, latest, statusCard, damaged, storageCard, buildProblemLogCard(downloadBlob))),
+    root: h('div', { class: 'screen-stack two-col' }, h('div', { class: 'screen-stack' }, appearance, buildGoalCard(), buildBackupSection(), whatsNew), h('div', { class: 'screen-stack' }, latest, statusCard, damaged, storageCard, buildEraseCard(), buildProblemLogCard(downloadBlob))),
   };
 }
 
@@ -165,6 +165,39 @@ async function buildYourDataCard() {
     );
   }
   return storageCard;
+}
+
+/**
+ * "Delete all my data": a confirmed wipe of every day, setting and photo kept
+ * in this browser, for a shared or handed-over phone. Reloads when done.
+ */
+function buildEraseCard() {
+  const status = createStatusLine();
+  const eraseBtn = h('button', { type: 'button', class: 'btn btn-danger-outline', 'data-erase-all': '', text: 'Delete all my data…' });
+  eraseBtn.addEventListener('click', async () => {
+    const ok = await confirmDialog({
+      title: 'Delete all your data?',
+      message: 'Every day, goal, setting and photo saved in this browser will be removed for good. Save a backup first if you want to keep anything.',
+      confirmLabel: 'Delete everything',
+      danger: true,
+    });
+    if (!ok) return;
+    try {
+      await store.eraseAll();
+      location.hash = '#/';
+      location.reload();
+    } catch (err) {
+      status.set('error', failureText('Delete all data', err));
+    }
+  });
+  return h(
+    'section',
+    { class: 'card', 'data-erase-card': '' },
+    h('h3', { class: 'section-title', text: 'Delete all my data' }),
+    h('p', { class: 'card-sub', text: 'Removes everything Free Calorie Counter saved in this browser: days, goal, settings and photos. Useful before you hand over or sell this phone.' }),
+    h('div', { class: 'notice-actions' }, eraseBtn),
+    status.el
+  );
 }
 
 /**
