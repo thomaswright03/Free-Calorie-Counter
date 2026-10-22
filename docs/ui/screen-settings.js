@@ -4,7 +4,7 @@ import { core, h, uid, prefs, today } from './dom.js';
 import { failureText, recordProblem, buildProblemLogCard } from './problems.js';
 import { confirmDialog, createStatusLine, createFieldStatus } from './feedback.js';
 import { store } from './store.js';
-import { applyTheme } from './theme.js';
+import { applyTheme, DEFAULT_THEME } from './theme.js';
 import { motionAllowed } from './motion.js';
 import { buildBackupSection, downloadBlob } from './backup.js';
 import { inAppleBrowserTab, runningInstalled, installSteps } from './install-note.js';
@@ -14,7 +14,7 @@ import { getGoal, setGoal, takeGoalFocus } from './goal.js';
 
 /** @type {import('./render.js').ScreenBuilder} */
 export async function buildSettings() {
-  const pref = prefs.get('theme', 'system');
+  const pref = prefs.get('theme', DEFAULT_THEME);
   const name = uid('theme');
   const options = [
     { value: 'system', label: 'System' },
@@ -42,7 +42,7 @@ export async function buildSettings() {
     { class: 'card' },
     h('h2', { class: 'card-title', text: 'Settings' }),
     h('h3', { class: 'section-title', text: 'Appearance' }),
-    h('p', { class: 'card-sub', text: 'System follows your device’s light or dark setting.' }),
+    h('p', { class: 'card-sub', text: 'Dark is the default. System follows your device’s light or dark setting.' }),
     themeGroup
   );
 

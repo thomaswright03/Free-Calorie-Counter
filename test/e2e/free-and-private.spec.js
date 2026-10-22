@@ -33,6 +33,12 @@ test('Settings links to the privacy policy and terms of service, which lead back
 });
 
 test('the privacy policy and terms follow the app’s theme', async ({ page, appURL }) => {
+  // Dark until a theme is chosen, whatever the device is set to.
+  await page.emulateMedia({ colorScheme: 'light' });
+  await page.goto(`${appURL}/privacy.html`);
+  expect(await page.evaluate(() => getComputedStyle(document.body).backgroundColor)).toBe('rgb(15, 23, 42)');
+  // With System chosen in Settings, they follow the device.
+  await page.evaluate(() => localStorage.setItem('fcc:theme', 'system'));
   for (const scheme of ['light', 'dark']) {
     await page.emulateMedia({ colorScheme: scheme });
     for (const name of ['privacy.html', 'terms.html']) {

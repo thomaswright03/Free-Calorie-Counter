@@ -51,6 +51,12 @@ test('days dated in the future are left out of History and averages', async ({ p
 });
 
 test('an unknown page on the site shows Free Calorie Counter’s “Page not found”, with a way into the app', async ({ page, appURL }) => {
+  // Dark until a theme is chosen, whatever the device is set to.
+  await page.emulateMedia({ colorScheme: 'light' });
+  await page.goto(`${appURL}/nope/deeper`);
+  expect(await page.evaluate(() => getComputedStyle(document.body).backgroundColor)).toBe('rgb(15, 23, 42)');
+  // With System chosen in Settings, it follows the device.
+  await page.evaluate(() => localStorage.setItem('fcc:theme', 'system'));
   for (const scheme of ['light', 'dark']) {
     await page.emulateMedia({ colorScheme: scheme });
     const res = await page.goto(`${appURL}/nope/deeper`);
