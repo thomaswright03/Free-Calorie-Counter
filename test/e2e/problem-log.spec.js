@@ -61,14 +61,19 @@ test('a failed save is noted in the problem log, which Settings shows, copies an
 });
 
 test('an error nothing else caught is noted with where in the code it happened', async ({ page, appURL }) => {
+  // A same-origin script file that throws (the CSP blocks inline scripts).
+  await page.route('**/test-throw.js', (route) => route.fulfill({ contentType: 'text/javascript', body: "throw new TypeError('secret 181.4')" }));
   await page.goto(appURL);
   await expect(page.getByLabel('Weight (lbs)')).toBeVisible();
-  await page.evaluate(() => {
-    const script = document.createElement('script');
-    script.textContent = "throw new TypeError('secret 181.4')";
-    document.head.append(script);
+  await page.evaluate(async () => {
     Promise.reject(new RangeError('also secret'));
+    const script = document.createElement('script');
+    script.src = 'test-throw.js';
+    const ran = new Promise((resolve) => script.addEventListener('load', resolve));
+    document.head.append(script);
+    await ran;
   });
+  await expect.poll(() => page.evaluate(() => (JSON.parse(localStorage.getItem('fcc:problemLog')) || []).length)).toBe(2);
   await page.goto(`${appURL}/#/settings`);
   const items = page.locator('[data-problem-log] [data-problem]');
   await expect(items).toHaveCount(2);

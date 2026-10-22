@@ -49,7 +49,10 @@ test('the page loads the built scripts, not the sources, so a first visit needs 
   const scripts = [...html.matchAll(/<script\b[^>]*\bsrc="([^"]+)"/g)].map((m) => m[1]);
   assert.deepEqual(scripts, ['build/data.js', 'build/app.js']);
   assert.match(html, /<script type="module" src="build\/app.js"><\/script>/);
-  assert.doesNotMatch(html, /modulepreload/);
+  // Only the built app script is preloaded (the CSP meta tag stops Chromium
+  // fetching it early on its own); never the sources.
+  const preloads = [...html.matchAll(/<link rel="modulepreload" href="([^"]+)"/g)].map((m) => m[1]);
+  assert.deepEqual(preloads, ['build/app.js']);
   const shell = appShell();
   for (const source of ['./core.js', './app.js', './ui/dom.js']) assert.ok(!shell.includes(source), `${source} is cached although the page never loads it`);
 });

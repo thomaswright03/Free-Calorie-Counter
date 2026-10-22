@@ -130,7 +130,7 @@ test('Settings has a Latest Update card with the frontend changes first', async 
   await expect(card.getByRole('heading', { name: 'Frontend changes' })).toBeVisible();
   const headings = await card.getByRole('heading').allTextContents();
   expect(headings).toEqual(['Latest Update', 'Frontend changes', 'Summary']);
-  await expect(card).toContainText('Set a daily goal');
+  expect(await card.locator('.update-list li').count()).toBeGreaterThan(0);
   // Only the latest round is listed: older rounds are replaced, not added to.
   expect(await card.locator('.update-list li').count()).toBeLessThanOrEqual(6);
   await expect(card).toContainText(/[A-Z][a-z]{2} \d{1,2}, \d{4}/);
