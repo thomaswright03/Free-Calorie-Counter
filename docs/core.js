@@ -18,6 +18,7 @@
 /**
  * @typedef {import('./core/entries.js').Entry} Entry
  * @typedef {import('./core/entries.js').EntryPatch} EntryPatch
+ * @typedef {import('./core/entries.js').Food} Food
  * @typedef {import('./core/backup-format.js').BackupPhoto} BackupPhoto
  * @typedef {import('./core/input.js').Validation} Validation
  */
@@ -70,6 +71,11 @@ module.exports = Object.freeze({
   formatAverageWeight: numbers.formatAverageWeight,
   emptyMeals: entries.emptyMeals,
   normalizeMealValue: entries.normalizeMealValue,
+  FOOD_NAME_MAX: entries.FOOD_NAME_MAX,
+  MEAL_FOODS_MAX: input.MEAL_FOODS_MAX,
+  mealFoods: entries.mealFoods,
+  sumFoods: entries.sumFoods,
+  validateFood: input.validateFood,
   normalizeEntry: entries.normalizeEntry,
   sanitizeEntries: entries.sanitizeEntries,
   isEntryEmpty: entries.isEntryEmpty,

@@ -1,72 +1,25 @@
-// Log Meal: one calorie total per meal, picked with the meal buttons.
+// Log Meal: each meal, picked with the meal buttons, logged as one calorie
+// total typed in, or one food at a time with the total added up.
 
-import { core, h, uid, MEAL_STEPS, mealLabel, today, blankEntry, notSavedReason } from './dom.js';
+import { core, h, MEAL_STEPS, mealLabel, today, blankEntry, notSavedReason, prefs } from './dom.js';
 import { failureText } from './problems.js';
-import { toast, createFieldStatus } from './feedback.js';
+import { toast } from './feedback.js';
 import { store } from './store.js';
 import { dayHash, logHash, replaceHashSilently, returnTo } from './router.js';
 import { render } from './render.js';
 import { saveDateFor, farBackGate } from './day.js';
 import { keepDraft, claimDraft, draftMealFor } from './drafts.js';
 import { sayLeftSaved, keepLeftUnsaved } from './leaving.js';
+import { modeFor, mealPicker, showRunningTotal, mealBoxes } from './log-boxes.js';
 
 /**
- * What the screen is working on: the day (see today-weight.js) and the
- * meal whose box is shown.
- * @typedef {import('./today-weight.js').DayView & { activeKey: string }} LogState
+ * What the screen is working on: the day (see today-weight.js), the meal
+ * whose box is shown, and whether it's logged as a total or food by food.
+ * @typedef {'total' | 'foods'} LogMode
+ * @typedef {import('./today-weight.js').DayView & { activeKey: string, mode: LogMode }} LogState
  */
 
-const HOW_IT_SAVES = 'Each meal saves as soon as you leave its box, pick another meal or leave this screen; saved meals show a ✓.';
-
-/**
- * The meal buttons. Each shows a ✓ and its calories once saved, for as long
- * as the screen is open.
- * @param {(key: string) => void} onPick
- */
-function mealPicker(onPick) {
-  const el = h('div', { class: 'meal-picker', role: 'group', 'aria-label': 'Meal' });
-  /** @type {Map<string, HTMLButtonElement>} */
-  const pills = new Map();
-  for (const step of MEAL_STEPS) {
-    const pill = h(
-      'button',
-      { type: 'button', 'data-meal': step.key, onClick: () => onPick(step.key) },
-      h('span', { class: 'pill-label', text: step.label }),
-      h('span', { class: 'pill-value', 'aria-hidden': 'true' })
-    );
-    pills.set(step.key, pill);
-    el.append(pill);
-  }
-  /** @param {LogState} state */
-  function refresh(state) {
-    for (const step of MEAL_STEPS) {
-      const pill = /** @type {HTMLButtonElement} */ (pills.get(step.key));
-      const value = state.entry.meals[step.key];
-      const active = step.key === state.activeKey;
-      pill.className = `meal-pill${active ? ' active' : ''}${value !== null ? ' filled' : ''}`;
-      pill.setAttribute('aria-pressed', active ? 'true' : 'false');
-      const valueEl = pill.querySelector('.pill-value');
-      if (valueEl) valueEl.textContent = value !== null ? `✓ ${core.formatNumber(value)}` : '';
-      pill.setAttribute('aria-label', value !== null ? `${step.label}, ${core.formatCalories(value)}, saved` : `${step.label}, not logged`);
-    }
-  }
-  return { el, refresh };
-}
-
-/**
- * The day total, which follows what's typed, marked as not saved until it is.
- * @param {HTMLElement} el
- * @param {LogState} state
- * @param {string} typedText
- */
-function showRunningTotal(el, state, typedText) {
-  const typed = core.validateCalories(typedText);
-  const unsaved = typed.ok && typed.value !== state.entry.meals[state.activeKey];
-  const meals = unsaved ? { ...state.entry.meals, [state.activeKey]: typed.value } : state.entry.meals;
-  const total = core.totalCalories(meals);
-  el.replaceChildren(total === null ? 'No meals logged yet' : `Day total: ${core.formatCalories(total)}`);
-  if (unsaved) el.append(h('span', { class: 'running-note', text: ` · ${mealLabel(state.activeKey)} not saved yet` }));
-}
+const HOW_IT_SAVES = 'Type a meal’s total, or add its foods one at a time and let the app add them up. Each meal saves as you go; saved meals show a ✓.';
 
 /**
  * What the screen's saving and its ways out share: the last save (while
@@ -217,11 +170,11 @@ function mealExits(state, input, status, saver) {
  * nothing.
  * @param {LogState} state
  * @param {() => Promise<boolean>} commit
- * @param {HTMLInputElement} input
+ * @param {() => void} focusBox puts the cursor back in the box to fix
  * @param {string | null} routeDate
  * @param {() => void} onClose runs as it returns to the day, having said what was saved
  */
-function doneButton(state, commit, input, routeDate, onClose) {
+function doneButton(state, commit, focusBox, routeDate, onClose) {
   const btn = h('button', { type: 'button', class: 'btn btn-primary', text: 'Save and close' });
   btn.addEventListener('click', async () => {
     if (btn.disabled) return;
@@ -230,7 +183,7 @@ function doneButton(state, commit, input, routeDate, onClose) {
     if (!(await commit())) {
       btn.disabled = false;
       btn.removeAttribute('aria-busy');
-      input.focus();
+      focusBox();
       return;
     }
     const total = core.totalCalories(state.entry.meals);
@@ -288,6 +241,26 @@ function boxKeys(input, on) {
   });
 }
 
+/**
+ * Leaving the screen, or the page being hidden: a food typed but not added
+ * is added, and what's in the total box is saved.
+ * @param {ReturnType<typeof mealBoxes>['foods']} foods
+ * @param {ReturnType<typeof mealExits>} exits
+ * @param {() => string} backHash
+ */
+function bothExits(foods, exits, backHash) {
+  return {
+    flush() {
+      foods.commitPending();
+      exits.flush();
+    },
+    leave() {
+      const leaving = [foods.leave(), exits.leave(backHash())].filter(Boolean);
+      return leaving.length ? Promise.all(leaving).then(() => undefined) : undefined;
+    },
+  };
+}
+
 /** @type {import('./render.js').ScreenBuilder} */
 export async function buildLog(ctx) {
   const now = today();
@@ -299,43 +272,49 @@ export async function buildLog(ctx) {
   }
   const entry = stored || blankEntry(date);
   const firstOpen = MEAL_STEPS.find((m) => entry.meals[m.key] === null);
+  const activeKey = ctx.route.meal || draftMealFor(date) || (firstOpen ? firstOpen : MEAL_STEPS[0]).key;
   /** @type {LogState} */
-  const state = { date, entry, rolledOver: false, activeKey: ctx.route.meal || draftMealFor(date) || (firstOpen ? firstOpen : MEAL_STEPS[0]).key };
+  const state = { date, entry, rolledOver: false, activeKey, mode: modeFor(entry, activeKey) };
   const draft = claimDraft(state.activeKey, date);
+  if (draft) state.mode = 'total';
 
-  const input = h('input', { type: 'text', inputmode: 'numeric', autocomplete: 'off', id: uid('cal'), placeholder: 'e.g. 450' });
-  const label = h('label', { for: input.id });
-  const status = createFieldStatus(input);
   const runningTotal = h('p', { class: 'running-total' });
   const picker = mealPicker((key) => switchTo(key));
-  const refresh = () => {
-    picker.refresh(state);
-    showRunningTotal(runningTotal, state, input.value);
-  };
+  const boxes = mealBoxes(state, picker, runningTotal, (mode) => switchMode(mode));
+  const { input, status, foods, refresh, focusBox, loadInput } = boxes;
   const saver = mealSaver(state, input, status, refresh);
   const exits = mealExits(state, input, status, saver);
-  const loadInput = () => {
-    const v = state.entry.meals[state.activeKey];
-    input.value = v === null ? '' : String(v);
-    label.textContent = `${mealLabel(state.activeKey)} calories`;
-  };
 
   /** @param {string} key */
   function select(key) {
     state.activeKey = key;
+    state.mode = modeFor(state.entry, key);
     status.set(null);
     loadInput();
     refresh();
     replaceHashSilently(logHash(ctx.route.date, key));
-    input.focus();
+    focusBox();
   }
+  // What's typed and not saved yet: the total, or a food not added.
+  const commitAll = async () => (await foods.commitPending()) && saver.commit();
   // Nothing to save: switch within the same tap. Otherwise save first.
   /** @param {string} key */
   async function switchTo(key) {
-    if (key === state.activeKey) input.focus();
-    else if (saver.settled() || (await saver.commit())) select(key);
+    if (key === state.activeKey) focusBox();
+    else if (saver.settled() || (await commitAll())) select(key);
   }
-  const doneBtn = doneButton(state, saver.commit, input, ctx.route.date, exits.closedWithSave);
+  /** @param {LogMode} mode */
+  async function switchMode(mode) {
+    if (mode === state.mode) return focusBox();
+    if (!(await commitAll())) return;
+    state.mode = mode;
+    prefs.set('mealMode', mode);
+    status.set(null);
+    loadInput();
+    refresh();
+    focusBox();
+  }
+  const doneBtn = doneButton(state, commitAll, focusBox, ctx.route.date, exits.closedWithSave);
   input.addEventListener('change', saver.commit);
   input.addEventListener('input', () => showRunningTotal(runningTotal, state, input.value));
   boxKeys(input, {
@@ -353,16 +332,15 @@ export async function buildLog(ctx) {
   const forDay = date === now ? `today, ${core.formatDate(date, now)}` : core.formatDate(date, now);
   const root = h('section', { class: 'card' }, h('h2', { class: 'card-title', text: 'Log Meal' }), h('p', { class: 'card-sub', text: `For ${forDay}. ${HOW_IT_SAVES}` }));
   const backBtn = backButton(state, ctx.route.date);
-  root.append(picker.el, h('div', { class: 'field' }, label, input, status.el), runningTotal, h('div', { class: 'log-actions' }, backBtn, doneBtn));
+  root.append(picker.el, boxes.toggle.el, boxes.totalField, foods.el, runningTotal, h('div', { class: 'log-actions' }, backBtn, doneBtn));
   return {
     title: date === now ? 'Log Meal' : `Log Meal, ${core.formatDate(date, now)}`,
     root,
     mounted: () => {
       if (draft) status.set('error', `Not saved yet. ${draft.error}`);
-      if (window.matchMedia && window.matchMedia('(hover: hover)').matches) input.focus({ preventScroll: true });
+      if (window.matchMedia && window.matchMedia('(hover: hover)').matches) focusBox({ preventScroll: true });
     },
-    flush: exits.flush,
-    leave: () => exits.leave(logHash(ctx.route.date, state.activeKey)),
+    ...bothExits(foods, exits, () => logHash(ctx.route.date, state.activeKey)),
     async refreshFromStorage() {
       state.entry = (await store.getEntry(state.date)) || blankEntry(state.date);
       if (document.activeElement !== input) loadInput();

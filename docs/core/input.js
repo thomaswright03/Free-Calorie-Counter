@@ -10,7 +10,7 @@
 
 const { isValidDateStr, formatDate } = require('./dates.js');
 const { formatNumber } = require('./numbers.js');
-const { MEAL_STEPS, emptyMeals, normalizeMealValue, roundWeight } = require('./entries.js');
+const { MEAL_STEPS, FOOD_NAME_MAX, emptyMeals, normalizeMealValue, roundWeight, sumFoods } = require('./entries.js');
 
 const LIMITS = {
   caloriesMin: 0,
@@ -18,6 +18,9 @@ const LIMITS = {
   weightMin: 50,
   weightMax: 1000,
 };
+
+// The most foods one meal can list.
+const MEAL_FOODS_MAX = 50;
 
 const FUTURE_DAY = "You can't log a day that hasn't happened yet.";
 const FUTURE_PHOTO = "A photo can't be filed under a day that hasn't happened yet.";
@@ -78,8 +81,52 @@ function validateWeightValue(v) {
   return validateWeight(String(v));
 }
 
-// Checks a change to one day ({ weight?, meals?: { key: calories } }),
-// as the phone's storage applies it.
+// Checks one food typed in: its name (optional) and calories, by the
+// rules for a meal's calories. On a problem, `field` says which box.
+/**
+ * @param {unknown} name
+ * @param {unknown} calories
+ * @returns {{ ok: true, food: import('./entries.js').Food } | { ok: false, field: 'name' | 'calories', error: string }}
+ */
+function validateFood(name, calories) {
+  const text = String(name === null || name === undefined ? '' : name).trim();
+  if (text.length > FOOD_NAME_MAX) return { ok: false, field: 'name', error: `Keep the food's name to ${FOOD_NAME_MAX} characters or fewer.` };
+  const checked = validateCalories(calories);
+  if (!checked.ok) return { ok: false, field: 'calories', error: checked.error.replace(' for one meal', ' for one food') };
+  if (checked.value === null) return { ok: false, field: 'calories', error: 'Enter the food’s calories, like 120.' };
+  return { ok: true, food: { name: text, calories: checked.value } };
+}
+
+// A meal's list of foods arriving as data (a stored change, a backup
+// file): each food by the rules for typed input, and their sum by the
+// rule for one meal. null or an empty list is "no foods".
+/**
+ * @param {unknown} list
+ * @returns {{ ok: true, foods: import('./entries.js').Food[] | null } | { ok: false, error: string }}
+ */
+function validateFoodsValue(list) {
+  if (list === null || list === undefined) return { ok: true, foods: null };
+  if (!Array.isArray(list)) return { ok: false, error: 'Its foods aren’t a list.' };
+  if (list.length > MEAL_FOODS_MAX) return { ok: false, error: `A meal can list ${MEAL_FOODS_MAX} foods at most.` };
+  const foods = [];
+  for (const f of list) {
+    if (!f || typeof f !== 'object' || Array.isArray(f)) return { ok: false, error: 'One of its foods isn’t in the expected format.' };
+    if (f.name !== undefined && typeof f.name !== 'string') return { ok: false, error: 'A food’s name must be text.' };
+    if (typeof f.calories !== 'number' || !Number.isFinite(f.calories)) return { ok: false, error: 'Enter calories using digits only, like 450.' };
+    const checked = validateFood(f.name, String(f.calories));
+    if (!checked.ok) return { ok: false, error: checked.error };
+    foods.push(checked.food);
+  }
+  if (foods.length === 0) return { ok: true, foods: null };
+  const total = sumFoods(foods);
+  if (total > LIMITS.caloriesMax) {
+    return { ok: false, error: `Its foods add up to ${formatNumber(total)} calories, over ${formatNumber(LIMITS.caloriesMax)} for one meal.` };
+  }
+  return { ok: true, foods };
+}
+
+// Checks a change to one day ({ weight?, meals?: { key: calories },
+// foods?: { key: list } }), as the phone's storage applies it.
 /**
  * @param {any} body
  * @returns {{ ok: true, patch: EntryPatch } | { ok: false, error: string }}
@@ -87,7 +134,7 @@ function validateWeightValue(v) {
 function validatePatch(body) {
   if (!body || typeof body !== 'object' || Array.isArray(body)) return { ok: false, error: 'Send the fields to change as a JSON object.' };
   for (const key of Object.keys(body)) {
-    if (key !== 'weight' && key !== 'meals') return { ok: false, error: `Unknown field "${key}".` };
+    if (key !== 'weight' && key !== 'meals' && key !== 'foods') return { ok: false, error: `Unknown field "${key}".` };
   }
   /** @type {EntryPatch} */
   const patch = {};
@@ -109,13 +156,27 @@ function validatePatch(body) {
     }
     patch.meals = meals;
   }
+  if (body.foods !== undefined) {
+    if (!body.foods || typeof body.foods !== 'object' || Array.isArray(body.foods)) return { ok: false, error: 'Foods must be an object.' };
+    /** @type {Record<string, import('./entries.js').Food[] | null>} */
+    const foods = {};
+    for (const key of Object.keys(body.foods)) {
+      const step = MEAL_STEPS.find((m) => m.key === key);
+      if (!step) return { ok: false, error: `Unknown meal "${key}".` };
+      const checked = validateFoodsValue(body.foods[key]);
+      if (!checked.ok) return { ok: false, error: `${step.label} not saved. ${checked.error}` };
+      foods[key] = checked.foods;
+    }
+    patch.foods = foods;
+  }
   return { ok: true, patch };
 }
 
 // Checks one incoming entry (from a backup file) strictly, by the same
 // rules as typed input. Returns { ok, entry } or { ok: false, error }
 // naming the day, the meal and the problem. Meals stored by the first
-// version as lists of foods are read as their total, as always.
+// version as lists of foods are read as their total, as always. A meal
+// with a `foods` list has that list, and its total is their sum.
 /**
  * @param {string} date
  * @param {any} raw
@@ -151,6 +212,18 @@ function validateIncomingEntry(date, raw) {
     if (!checked.ok) return { ok: false, error: `${step.label} on ${when} (${String(v).slice(0, 20)}): ${checked.error}` };
     meals[step.key] = checked.value;
   }
+  /** @type {Record<string, import('./entries.js').Food[]>} */
+  const foods = {};
+  if (raw.foods !== undefined && raw.foods !== null) {
+    if (typeof raw.foods !== 'object' || Array.isArray(raw.foods)) return { ok: false, error: `The foods for ${when} aren’t in the expected format.` };
+    for (const step of MEAL_STEPS) {
+      const checked = validateFoodsValue(raw.foods[step.key]);
+      if (!checked.ok) return { ok: false, error: `${step.label} on ${when}: ${checked.error}` };
+      if (!checked.foods) continue;
+      foods[step.key] = checked.foods;
+      meals[step.key] = sumFoods(checked.foods);
+    }
+  }
   let weight = null;
   if (raw.weight !== null && raw.weight !== undefined) {
     // The first version saved weights exactly as typed; a backup from
@@ -160,17 +233,23 @@ function validateIncomingEntry(date, raw) {
     if (!checked.ok) return { ok: false, error: `The weight on ${when} (${String(raw.weight).slice(0, 20)}): ${checked.error}` };
     weight = checked.value;
   }
-  return { ok: true, entry: { date, weight, meals } };
+  /** @type {Entry} */
+  const entry = { date, weight, meals };
+  if (Object.keys(foods).length) entry.foods = foods;
+  return { ok: true, entry };
 }
 
 module.exports = {
   LIMITS,
+  MEAL_FOODS_MAX,
   FUTURE_DAY,
   FUTURE_PHOTO,
   validateCalories,
   validateWeight,
   validateCaloriesValue,
   validateWeightValue,
+  validateFood,
+  validateFoodsValue,
   validatePatch,
   validateIncomingEntry,
 };
