@@ -7,7 +7,7 @@
 export const LATEST_UPDATE = {
   date: '2026-10-22',
   summary:
-    'This round is about keeping your data safe. Free Calorie Counter is moving to its own address, calories.wright-ai-solutions.com, so no other website can share its storage on your phone; Today asks you to save a backup to bring with you. You can now delete everything the app saved from Settings, the app blocks scripts from anywhere else, backups only bring back real photos, and the app opens about two seconds sooner on a slow connection.',
+    'This round is about keeping your data safe. Free Calorie Counter is moving to its own address, calories.wright-ai-solutions.com, so no other website can share its storage on your phone; Today asks you to save a backup to bring with you. You can now delete everything the app saved from Settings, the app blocks scripts from anywhere else, backups only bring back real photos, the app opens about two seconds sooner on a slow connection, and dark is now the default theme.',
   /** What you can see in the app, listed first. */
   frontend: [
     'New on a phone: an animated walkthrough, with our mission, shows you how to add Free Calorie Counter to your Home Screen (where your days are kept) before you start, on iPhone and Android.',
@@ -15,5 +15,6 @@ export const LATEST_UPDATE = {
     'Settings: a new “Delete all my data…” button removes every day, goal, setting and photo from this browser, after you confirm.',
     'Restoring a backup now only accepts photos in common image types (JPEG, PNG, WebP, GIF, HEIC); other files, or files whose contents aren’t really an image, are rejected.',
     'The first visit on a slow connection opens about two seconds sooner.',
+    'The app is now dark until you pick a theme. Light and System are still in Settings → Appearance, and a theme you already picked is kept.',
   ],
 };

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-YA9CnSzVdIx5RaaXYKqn9izQSHb9ek2z6WTwEsRFMhM='; img-src 'self' blob: data:; style-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-ADJV15TMLYvROGtv5a7nKq8WXJEnKW4uwoxgg+fyqzQ='; img-src 'self' blob: data:; style-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Free Calorie Counter</title>
 <meta name="description" content="A private calorie and weight tracker. Your data stays on your device.">
@@ -18,10 +18,10 @@
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <script>
   // Set the theme before the stylesheet paints, so there's no flash of the
-  // wrong theme on launch.
+  // wrong theme on launch. Dark until a theme is chosen in Settings.
   (function () {
-    var pref = 'system';
-    try { pref = localStorage.getItem('fcc:theme') || 'system'; } catch (e) { pref = 'system'; }
+    var pref = 'dark';
+    try { pref = localStorage.getItem('fcc:theme') || 'dark'; } catch (e) { pref = 'dark'; }
     var dark = pref === 'dark' || (pref !== 'light' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
     document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
     var bar = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');

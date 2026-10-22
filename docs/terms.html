@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-BxFBUzFuhoUm6qZe6zhdNFgEwLKjBHUyMygbH1dDdJE='; img-src 'self' blob: data:; style-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-NlX5SpdD8C+KUhfx93el/g7I5L9unlmRPJpOKA2HLPE='; img-src 'self' blob: data:; style-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#f1f5f9" media="(prefers-color-scheme: light)">
@@ -10,10 +10,10 @@
 <title>Terms of service · Free Calorie Counter</title>
 <meta name="description" content="The terms for using Free Calorie Counter, a free calorie and weight tracker.">
 <script>
-  // The theme chosen in Free Calorie Counter's Settings, or the system's.
+  // The theme chosen in Free Calorie Counter's Settings, or dark until one is chosen.
   (function () {
-    var pref = 'system';
-    try { pref = localStorage.getItem('fcc:theme') || 'system'; } catch (e) { pref = 'system'; }
+    var pref = 'dark';
+    try { pref = localStorage.getItem('fcc:theme') || 'dark'; } catch (e) { pref = 'dark'; }
     var dark = pref === 'dark' || (pref !== 'light' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
     document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
   })();
