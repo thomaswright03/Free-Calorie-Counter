@@ -33,20 +33,34 @@ test('the goal is written to a backup and read back; a backup without one gives 
   assert.equal(bogus.dailyGoal, null);
 });
 
-test('Latest Update is at least as new as the newest commit touching docs/ (when git history is available)', () => {
+test('Latest Update was changed in or after the newest commit touching docs/ (when git history is available)', () => {
   const root = path.join(__dirname, '..', '..');
   const { LATEST_UPDATE } = { LATEST_UPDATE: parseUpdate(fs.readFileSync(path.join(root, 'docs/ui/latest-update.js'), 'utf8')) };
   assert.match(LATEST_UPDATE.date, /^\d{4}-\d{2}-\d{2}$/);
   assert.ok(LATEST_UPDATE.frontendCount > 0);
   // Each round replaces the last one's list instead of adding to it.
   assert.ok(LATEST_UPDATE.frontendCount <= 6, `Latest Update lists ${LATEST_UPDATE.frontendCount} changes: list only the latest round (6 at most)`);
-  let newest = '';
+  // The last commit that touched user-facing docs/ files (other than this file
+  // and the generated build) must not come after the last commit that
+  // changed latest-update.js.
+  const git = (...args) => execFileSync('git', args, { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+  let docsCommit = '';
+  let updateCommit = '';
   try {
-    newest = execFileSync('git', ['log', '-1', '--format=%cs', '--', 'docs'], { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+    docsCommit = git('rev-list', '-1', 'HEAD', '--', 'docs', ':(exclude)docs/build', ':(exclude)docs/ui/latest-update.js');
+    updateCommit = git('rev-list', '-1', 'HEAD', '--', 'docs/ui/latest-update.js');
   } catch {
     return;
   }
-  if (newest) assert.ok(LATEST_UPDATE.date >= newest, `Latest Update (${LATEST_UPDATE.date}) is older than the newest docs/ commit (${newest}): update docs/ui/latest-update.js`);
+  if (!docsCommit || !updateCommit || docsCommit === updateCommit) return;
+  let ok = true;
+  try {
+    git('merge-base', '--is-ancestor', docsCommit, updateCommit);
+  } catch (e) {
+    // Exit 1 means "not an ancestor"; anything else (shallow clone) is skipped.
+    ok = e.status !== 1;
+  }
+  assert.ok(ok, `docs/ commit ${docsCommit.slice(0, 7)} is newer than the last Latest Update change (${updateCommit.slice(0, 7)}): update docs/ui/latest-update.js`);
 });
 
 function parseUpdate(source) {

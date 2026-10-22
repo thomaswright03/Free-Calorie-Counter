@@ -7,14 +7,12 @@
 export const LATEST_UPDATE = {
   date: '2026-10-22',
   summary:
-    'This round brought the app to life with animations. Screens glide in from the side you tapped toward, numbers count up, graphs draw themselves, and buttons, messages and windows move smoothly. If your phone is set to Reduce Motion, all of it stays still.',
+    'This round tidied Today and the App status page. Today now shows 0 for a day with nothing logged, and offers a Set a daily goal link when you have no goal yet. The status page explains its warnings more clearly. The link is now big enough to tap easily, and it reliably puts the cursor in the goal field.',
   /** What you can see in the app, listed first. */
   frontend: [
-    'Screens slide in from the direction of the tab you tapped, with their cards arriving one after another, and the green highlight glides between tabs.',
-    'Today’s calorie total counts up, a new bar under it fills toward your daily goal, and a meal you change or remove flashes so you can see what moved.',
-    'Graphs draw their line from left to right and the dots land on it, and Compare’s bars grow into place.',
-    'Buttons press in when tapped, messages slide up and fade away, windows and the photo viewer rise into view, and switching between light and dark fades smoothly.',
-    'The What’s new tour fades in, its card springs between stops, and the highlight around each feature gently pulses.',
-    'With Reduce Motion turned on (Settings › Accessibility › Motion on iPhone), none of this moves.',
+    'Today: a “Set a daily goal” link appears under the total when no goal is set. It opens Settings with the goal field ready to type in.',
+    'The “Set a daily goal” link has a large tap area (at least 44 by 44 pixels), so it is easy to hit on a phone.',
+    'Today: a day with nothing logged now shows 0 instead of a dash.',
+    'Settings › App status: the “Offline cache” and “Storage persistence” warnings now say plainly what is wrong and what it means.',
   ],
 };

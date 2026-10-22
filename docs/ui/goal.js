@@ -51,3 +51,21 @@ export function showGoalMeter(el, total) {
 export function goalText(meals) {
   return core.goalProgress(core.totalCalories(meals), getGoal());
 }
+
+let focusGoalNext = false;
+
+/** Asks Settings to put the cursor in the goal field the next time it draws. */
+export function focusGoalOnNextSettings() {
+  focusGoalNext = true;
+}
+
+/**
+ * Called by Settings once the goal field is on the page: focuses it if a
+ * "Set a daily goal" link asked for that.
+ * @param {HTMLElement} input
+ */
+export function takeGoalFocus(input) {
+  if (!focusGoalNext) return;
+  focusGoalNext = false;
+  requestAnimationFrame(() => input.focus({ preventScroll: true }));
+}

@@ -10,7 +10,7 @@ import { buildBackupSection, downloadBlob } from './backup.js';
 import { inAppleBrowserTab, runningInstalled, installSteps } from './install-note.js';
 import { showWhatsNew } from './whats-new.js';
 import { LATEST_UPDATE } from './latest-update.js';
-import { getGoal, setGoal } from './goal.js';
+import { getGoal, setGoal, takeGoalFocus } from './goal.js';
 
 /** @type {import('./render.js').ScreenBuilder} */
 export async function buildSettings() {
@@ -87,6 +87,8 @@ function buildGoalCard() {
     status.set('saved', result.value === null ? 'Goal cleared' : `Goal saved: ${core.formatNumber(result.value)} calories a day`);
   };
   input.addEventListener('change', save);
+  // Focus once the screen is in the page (a no-op unless Today's goal link asked).
+  takeGoalFocus(input);
   input.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') save();
   });
