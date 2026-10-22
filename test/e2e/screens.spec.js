@@ -1,4 +1,4 @@
-const { test, expect, TODAY, day } = require('./fixtures');
+const { test, expect, TODAY, day, openFromHomeScreen } = require('./fixtures');
 
 const nav = (page) => page.getByRole('navigation', { name: 'Main' });
 const ISO_DATE = /\d{4}-\d{2}-\d{2}/;
@@ -339,6 +339,7 @@ test("today's unfinished day doesn't drag the calorie trend, and is compared as 
 
 test('light and dark themes follow the system and can be overridden', async ({ browser, appURL }) => {
   const light = await browser.newContext({ colorScheme: 'light' });
+  await openFromHomeScreen(light);
   const page = await light.newPage();
   await page.goto(appURL);
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
@@ -354,6 +355,8 @@ test('light and dark themes follow the system and can be overridden', async ({ b
   await light.close();
 
   const dark = await browser.newContext({ colorScheme: 'dark' });
+
+  await openFromHomeScreen(dark);
   const page2 = await dark.newPage();
   await page2.goto(appURL);
   await expect(page2.locator('html')).toHaveAttribute('data-theme', 'dark');

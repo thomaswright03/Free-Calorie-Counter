@@ -1,5 +1,5 @@
 const fs = require('node:fs');
-const { test, expect, TODAY, day } = require('./fixtures');
+const { test, expect, TODAY, day, openFromHomeScreen } = require('./fixtures');
 
 // A 2x2 PNG.
 const PNG = Buffer.from(
@@ -101,6 +101,7 @@ test('a backup file restores every day and photo, without duplicates on re-impor
   // Restore into a completely empty app (fresh storage).
   const freshURL = await startApp();
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: 'en-US', timezoneId: 'America/Chicago' });
+  await openFromHomeScreen(ctx);
   const fresh = await ctx.newPage();
   await fresh.clock.setFixedTime(new Date('2026-09-24T10:00:00-05:00'));
   await fresh.goto(`${freshURL}/#/settings`);
@@ -222,6 +223,7 @@ test('a photo can be filed under an earlier day and moved to another day later',
   await (await after).saveAs(afterFile);
   const freshURL = await startApp();
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: 'en-US', timezoneId: 'America/Chicago' });
+  await openFromHomeScreen(ctx);
   const fresh = await ctx.newPage();
   await fresh.clock.setFixedTime(new Date('2026-09-24T10:00:00-05:00'));
   await fresh.goto(`${freshURL}/#/settings`);

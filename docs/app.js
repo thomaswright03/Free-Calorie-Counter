@@ -18,6 +18,7 @@ import { buildSettings } from './ui/screen-settings.js';
 import { buildAdmin } from './ui/screen-admin.js';
 import { recordProblem, recordUncaughtErrors } from './ui/problems.js';
 import { showWhatsNewOnce } from './ui/whats-new.js';
+import { needsHomeScreenFirst, renderInstallGate } from './ui/install-gate.js';
 
 registerScreens({
   today: buildToday,
@@ -68,6 +69,12 @@ async function start() {
     return;
   }
   store.requestPersistence();
+  // A new user on a phone adds the app to the Home Screen before anything else.
+  if (await needsHomeScreenFirst()) {
+    renderInstallGate();
+    registerServiceWorker();
+    return;
+  }
   store.onExternalChange(refreshCurrentScreen);
 
   // A number typed but not yet saved is saved when the page is hidden (app
@@ -95,7 +102,10 @@ async function start() {
   await render();
   reportUnclaimedDraft();
   showWhatsNewOnce();
+  registerServiceWorker();
+}
 
+function registerServiceWorker() {
   // The app's files are kept for opening offline. Browsers allow this on
   // https and on localhost only.
   if ('serviceWorker' in navigator) {

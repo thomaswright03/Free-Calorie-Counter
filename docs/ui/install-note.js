@@ -19,7 +19,7 @@ export function runningInstalled() {
 }
 
 /** iPhone, iPod or iPad (which reports itself as a Mac with a touch screen). */
-function onAppleMobile() {
+export function onAppleMobile() {
   const nav = window.navigator;
   if (/iPhone|iPad|iPod/.test(nav.userAgent)) return true;
   return /Macintosh/.test(nav.userAgent) && nav.maxTouchPoints > 1;
@@ -35,8 +35,8 @@ export function installSteps() {
   return h(
     'ol',
     { class: 'install-steps' },
-    h('li', { text: 'Tap the Share button (the square with an arrow) in Safari’s toolbar.' }),
-    h('li', { text: 'Tap Add to Home Screen, then Add.' }),
+    h('li', { text: 'Tap the Share button (the square with an arrow) in Safari’s toolbar. Don’t see it? Tap ••• first.' }),
+    h('li', { text: 'Tap Add to Home Screen (scroll down if you don’t see it), then Add.' }),
     h('li', { text: 'From now on, open Free Calorie Counter from its new icon.' })
   );
 }

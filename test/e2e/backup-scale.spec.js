@@ -1,5 +1,5 @@
 const fs = require('node:fs');
-const { test, expect } = require('./fixtures');
+const { test, expect, openFromHomeScreen } = require('./fixtures');
 
 // A year of daily progress photos of about 400 KB each (a phone photo after
 // the app downscales it) is a library of about 145 MB, and a backup file of
@@ -134,6 +134,7 @@ test('a year of photos opens, backs up and restores a photo at a time', async ({
 
   const freshURL = await startApp();
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: 'en-US', timezoneId: 'America/Chicago' });
+  await openFromHomeScreen(ctx);
   const fresh = await ctx.newPage();
   await fresh.clock.setFixedTime(new Date('2026-09-24T10:00:00-05:00'));
   await fresh.goto(`${freshURL}/#/settings`);

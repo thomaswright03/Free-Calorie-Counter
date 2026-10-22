@@ -986,6 +986,13 @@ body.is-touring { padding-bottom: 100vh; }
 .install-steps { margin: var(--s2) 0; padding-left: var(--s5); font-size: var(--fs-sm); }
 .install-steps li { margin-bottom: var(--s1); }
 
+/* A new user's first screen on a phone, until the app is on the Home
+   Screen: nothing else in the app is reachable. */
+body.is-install-gate .tabs,
+body.is-install-gate .settings-link { display: none; }
+.install-gate .install-steps { font-size: var(--fs-md); }
+.install-gate > .btn { width: 100%; }
+
 /* A day far back enough that its year was probably mistyped, and other
    notes inside a card. */
 .far-back,
