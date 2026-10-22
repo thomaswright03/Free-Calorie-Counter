@@ -72,3 +72,8 @@ WebKit job runs in CI only. Rebuild with `npm run build` after editing `docs/` (
 ## Security fix round 2 (2026-10-22, after grade 85)
 - index.html inline script redirects http: to https: (CSP hash updated); Latest Update refreshed; CI checkout fetch-depth 0.
 - Still owner-only: tick Enforce HTTPS in Pages, admin-bypass in branch protection.
+
+## Security fix round 1 (2026-10-22, after grade 79)
+- Red CI fixed: Latest Update freshness test (test/unit/goal.test.js) now ignores docs/sw.js (build-stamped) as well as docs/build, so rebuild-only commits no longer fail it. All unit tests pass except store-local-photos locally (fake-indexeddb not installed in this sandbox; CI uses npm ci).
+- Live site: https://calories.wright-ai-solutions.com/ (old github.io address redirects there).
+- Still owner-only: tick Enforce HTTPS, set Pages source to GitHub Actions, branch protection "no bypass". Then confirm Tests are green and the live index.html matches HEAD.

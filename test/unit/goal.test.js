@@ -47,7 +47,7 @@ test('Latest Update was changed in or after the newest commit touching docs/ (wh
   let docsCommit = '';
   let updateCommit = '';
   try {
-    docsCommit = git('rev-list', '-1', 'HEAD', '--', 'docs', ':(exclude)docs/build', ':(exclude)docs/ui/latest-update.js');
+    docsCommit = git('rev-list', '-1', 'HEAD', '--', 'docs', ':(exclude)docs/build', ':(exclude)docs/sw.js', ':(exclude)docs/ui/latest-update.js');
     updateCommit = git('rev-list', '-1', 'HEAD', '--', 'docs/ui/latest-update.js');
   } catch {
     return;
