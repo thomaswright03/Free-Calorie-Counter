@@ -5,6 +5,7 @@ import { failureText, recordProblem, buildProblemLogCard } from './problems.js';
 import { confirmDialog, createStatusLine, createFieldStatus } from './feedback.js';
 import { store } from './store.js';
 import { applyTheme } from './theme.js';
+import { motionAllowed } from './motion.js';
 import { buildBackupSection, downloadBlob } from './backup.js';
 import { inAppleBrowserTab, runningInstalled, installSteps } from './install-note.js';
 import { showWhatsNew } from './whats-new.js';
@@ -28,7 +29,10 @@ export async function buildSettings() {
       const radio = h('input', { type: 'radio', name, value: o.value, id: `${name}-${o.value}`, class: 'visually-hidden', checked: o.value === pref });
       radio.addEventListener('change', () => {
         prefs.set('theme', o.value);
-        applyTheme(o.value);
+        // The whole app cross-fades into the new theme where the browser
+        // can (Safari 18 and later); elsewhere it switches at once.
+        if (document.startViewTransition && motionAllowed()) document.startViewTransition(() => applyTheme(o.value));
+        else applyTheme(o.value);
       });
       return [radio, h('label', { for: radio.id, class: 'segment', text: o.label })];
     })

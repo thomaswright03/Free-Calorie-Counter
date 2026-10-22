@@ -33,7 +33,10 @@ module.exports = defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : 'list',
-  use: { trace: 'retain-on-failure' },
+  // The app's animations (style.css, "motion") run only when the phone
+  // allows motion. Tests measure where things settle, so they run with
+  // reduced motion; motion.spec.js turns it back on to test the animations.
+  use: { trace: 'retain-on-failure', contextOptions: { reducedMotion: 'reduce' } },
   projects: [
     { name: 'phone-app', use: { ...phone, browserName: 'chromium' } },
     ...(withWebKit ? [{ name: 'phone-app-webkit', use: { ...phone, browserName: 'webkit' } }] : []),

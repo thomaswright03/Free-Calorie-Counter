@@ -5,14 +5,16 @@
 // than the newest commit that touched docs/, or the list grows past 6.
 
 export const LATEST_UPDATE = {
-  date: '2026-10-21',
+  date: '2026-10-22',
   summary:
-    'This round made the Status page easier to read and made releases safer. Times on the Status page now show your time zone, a check that can’t run says so in a plain sentence, the “Page not found” page shows the app’s icon, and a new version of the app only goes live after all of its tests pass.',
+    'This round brought the app to life with animations. Screens glide in from the side you tapped toward, numbers count up, graphs draw themselves, and buttons, messages and windows move smoothly. If your phone is set to Reduce Motion, all of it stays still.',
   /** What you can see in the app, listed first. */
   frontend: [
-    'Status page times now include your time zone, like “Oct 21, 2026, 7:15 AM CDT”.',
-    'If a Status page check can’t run, it says “This check couldn’t run on this device” and gives the browser’s reason, instead of a code name.',
-    'The “Page not found” page shows the Free Calorie Counter icon in the browser tab.',
-    'New versions go live only after every test has passed, so a broken change can’t reach your phone.',
+    'Screens slide in from the direction of the tab you tapped, with their cards arriving one after another, and the green highlight glides between tabs.',
+    'Today’s calorie total counts up, a new bar under it fills toward your daily goal, and a meal you change or remove flashes so you can see what moved.',
+    'Graphs draw their line from left to right and the dots land on it, and Compare’s bars grow into place.',
+    'Buttons press in when tapped, messages slide up and fade away, windows and the photo viewer rise into view, and switching between light and dark fades smoothly.',
+    'The What’s new tour fades in, its card springs between stops, and the highlight around each feature gently pulses.',
+    'With Reduce Motion turned on (Settings › Accessibility › Motion on iPhone), none of this moves.',
   ],
 };

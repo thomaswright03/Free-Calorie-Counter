@@ -6,6 +6,7 @@ import { h, byId } from './dom.js';
 import { closeAllDialogs } from './feedback.js';
 import { route, updateTabs } from './router.js';
 import { failureText, recordProblem } from './problems.js';
+import { enterScreen } from './motion.js';
 
 /**
  * What a screen builder returns.
@@ -98,6 +99,9 @@ export async function render(options) {
   stopLoading();
   if (currentView && currentView.release) currentView.release();
   view.release = () => releases.forEach((fn) => fn());
+  // A screen (or day) newly opened animates in; the same one drawn again
+  // with new data doesn't.
+  if (place !== currentPlace) enterScreen(main, view.root, currentPlace.split('/')[0], route.screen);
   currentView = view;
   currentPlace = place;
   main.replaceChildren(view.root);

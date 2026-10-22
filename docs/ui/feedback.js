@@ -2,6 +2,7 @@
 // under each input.
 
 import { h, uid, byId } from './dom.js';
+import { motionAllowed } from './motion.js';
 
 /**
  * @typedef {{ tone?: 'info' | 'warning' | 'error', message: string }} Notice
@@ -60,7 +61,7 @@ export function toast(message, options) {
   const dismiss = () => {
     clearTimeout(timer);
     liveToasts.delete(el);
-    el.remove();
+    leave(el);
   };
   const action = opts.action;
   if (action) {
@@ -78,14 +79,35 @@ export function toast(message, options) {
   }
   toasts.append(el);
   liveToasts.set(el, dismiss);
-  while (toasts.children.length > 3 && toasts.firstElementChild instanceof HTMLElement) {
-    const oldest = toasts.firstElementChild;
+  for (;;) {
+    const showing = Array.from(toasts.children).filter((t) => !t.classList.contains('is-leaving'));
+    const oldest = showing[0];
+    if (showing.length <= 3 || !(oldest instanceof HTMLElement)) break;
     const dismissOldest = liveToasts.get(oldest);
     if (dismissOldest) dismissOldest();
     else oldest.remove();
   }
   const timer = setTimeout(dismiss, opts.duration || (opts.action ? 7000 : 4000));
   return dismiss;
+}
+
+const TOAST_LEAVE_MS = 200;
+
+/**
+ * Takes a toast off the screen: at once, or fading down first. A toast on
+ * its way out is no longer read out or tappable.
+ * @param {HTMLElement} el
+ */
+function leave(el) {
+  if (!motionAllowed() || !el.isConnected) {
+    el.remove();
+    return;
+  }
+  el.classList.add('is-leaving');
+  el.setAttribute('aria-hidden', 'true');
+  el.removeAttribute('role');
+  el.style.pointerEvents = 'none';
+  setTimeout(() => el.remove(), TOAST_LEAVE_MS);
 }
 
 /** Called when another screen opens: clears messages about the one left. */

@@ -172,7 +172,8 @@ function drawLines(chart, plotted, s) {
   /** @type {string[]} */
   let solid = [];
   const flush = () => {
-    if (solid.length > 1) chart.append(svg('polyline', { class: 'line', points: solid.join(' ') }));
+    // pathLength 1 lets the line draw itself in (style.css) whatever its length.
+    if (solid.length > 1) chart.append(svg('polyline', { class: 'line', points: solid.join(' '), pathLength: 1 }));
     solid = [];
   };
   /** @type {Plotted | null} */
@@ -199,10 +200,12 @@ function drawDots(chart, plotted, s) {
   plotted.forEach((p, i) => {
     const last = i === plotted.length - 1;
     if (!showAll && !last && !p.partial) return;
-    chart.append(svg('circle', { class: p.partial ? 'dot dot-partial' : 'dot', cx: s.x(p.day), cy: s.y(p.value), r: last ? 4.5 : 3.5 }));
+    // --t: how far along the line the dot is, so the dots land as the line reaches them.
+    const along = `--t:${((s.x(p.day) - s.left) / Math.max(1, s.right - s.left)).toFixed(3)}`;
+    chart.append(svg('circle', { class: p.partial ? 'dot dot-partial' : 'dot', cx: s.x(p.day), cy: s.y(p.value), r: last ? 4.5 : 3.5, style: along }));
     if (p.partial) {
       const above = s.y(p.value) - 10 > s.top + 8;
-      chart.append(svg('text', { class: 'partial-label', x: s.x(p.day) - 8, y: above ? s.y(p.value) - 10 : s.y(p.value) + 18, 'text-anchor': 'end' }, 'so far'));
+      chart.append(svg('text', { class: 'partial-label', x: s.x(p.day) - 8, y: above ? s.y(p.value) - 10 : s.y(p.value) + 18, 'text-anchor': 'end', style: along }, 'so far'));
     }
   });
 }
@@ -307,8 +310,13 @@ export function drawChart(host, data, opts) {
   }
   const fmt = formatter({ ...opts, averaged: opts.averaged || frame.period !== 'day' });
   const s = chartScale(plotted, frame, Math.max(260, host.clientWidth || 320), opts);
+  // The line draws itself in when the chart first shows and when the range
+  // changes, not when the screen is resized or turned.
+  const drawn = `${opts.rangeDays}`;
+  const fresh = host.dataset.drawn !== drawn;
+  host.dataset.drawn = drawn;
   const chart = svg('svg', {
-    class: `chart-svg series-${opts.field}`,
+    class: `chart-svg series-${opts.field}${fresh ? ' is-drawing' : ''}`,
     width: s.width,
     height: s.height,
     viewBox: `0 0 ${s.width} ${s.height}`,

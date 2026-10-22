@@ -3,7 +3,8 @@
 // Undo button in its row while the screen is open, and if the screen is
 // left soon after, the next screen offers Undo for a few seconds more.
 
-import { showGoalLine } from './goal.js';
+import { showGoalLine, showGoalMeter } from './goal.js';
+import { countTo, replay } from './motion.js';
 import { core, h, MEAL_STEPS, mealLabel, today, notSavedReason } from './dom.js';
 import { failureText } from './problems.js';
 import { toast, announce } from './feedback.js';
@@ -53,21 +54,11 @@ async function putBackElsewhere(key, r) {
  * @returns {{ total: HTMLElement, list: HTMLElement, refresh: () => void, offerUndoAfterLeaving: () => void }}
  */
 export function buildMealList(view, where) {
-  const totalNum = h('div', { class: 'total-num' });
-  const totalLabel = h('div', { class: 'total-label' });
-  const totalGoal = h('div', { class: 'total-goal', 'data-goal-progress': '' });
+  const total = buildTotal(view, where);
   const list = h('ul', { class: 'meal-list', 'aria-label': 'Meals' });
+  const flashChanged = changedRowFlasher(list, view);
   /** Meals removed on this screen, not put back. @type {Map<string, Removed>} */
   const removed = new Map();
-
-  function refreshTotal() {
-    const total = core.totalCalories(view.entry.meals);
-    totalNum.textContent = total === null ? '—' : core.formatNumber(total);
-    const when = where.isToday ? 'today' : core.formatDate(view.date, today());
-    totalLabel.textContent =
-      total === null ? `No meals logged ${where.isToday ? 'yet today' : `for ${when}`}` : `calories logged ${where.isToday ? 'today' : `on ${when}`}`;
-    showGoalLine(totalGoal, total);
-  }
 
   /** @param {string} key @param {string} selector */
   function focusInRow(key, selector) {
@@ -124,7 +115,8 @@ export function buildMealList(view, where) {
 
   function refresh() {
     list.replaceChildren(...MEAL_STEPS.map(row));
-    refreshTotal();
+    flashChanged();
+    total.refresh();
   }
   refresh();
 
@@ -142,7 +134,58 @@ export function buildMealList(view, where) {
     removed.clear();
   }
 
-  return { total: h('div', { class: 'total-box' }, totalNum, totalLabel, totalGoal), list, refresh, offerUndoAfterLeaving };
+  return { total: total.el, list, refresh, offerUndoAfterLeaving };
+}
+
+/**
+ * The day's total: the number, which counts up from the total shown
+ * before (from zero when the screen opens), what it is, the goal line and
+ * the bar that fills toward the goal.
+ * @param {import('./today-weight.js').DayView} view
+ * @param {{ isToday: boolean }} where
+ * @returns {{ el: HTMLElement, refresh: () => void }}
+ */
+function buildTotal(view, where) {
+  const num = h('div', { class: 'total-num' });
+  const label = h('div', { class: 'total-label' });
+  const goalLine = h('div', { class: 'total-goal', 'data-goal-progress': '' });
+  const meter = h('div', { class: 'goal-meter is-fresh', 'aria-hidden': 'true' }, h('span', { class: 'goal-meter-fill' }));
+  // The bar fills from empty when the screen opens, then glides on each change.
+  setTimeout(() => meter.classList.remove('is-fresh'), 1200);
+  let shown = 0;
+  function refresh() {
+    const total = core.totalCalories(view.entry.meals);
+    if (total === null) num.textContent = '—';
+    else countTo(num, shown, total, core.formatNumber);
+    shown = total === null ? 0 : total;
+    const when = where.isToday ? 'today' : core.formatDate(view.date, today());
+    label.textContent =
+      total === null ? `No meals logged ${where.isToday ? 'yet today' : `for ${when}`}` : `calories logged ${where.isToday ? 'today' : `on ${when}`}`;
+    showGoalLine(goalLine, total);
+    showGoalMeter(meter, total);
+  }
+  return { el: h('div', { class: 'total-box' }, num, label, goalLine, meter), refresh };
+}
+
+/**
+ * Returns a function to call after each redraw of the meal list: it
+ * flashes the rows whose value changed since the last one (a meal logged,
+ * removed or put back), not the rows of the first drawing.
+ * @param {HTMLElement} list
+ * @param {import('./today-weight.js').DayView} view
+ */
+function changedRowFlasher(list, view) {
+  /** @type {Map<string, number | null> | null} */
+  let drawn = null;
+  return () => {
+    const before = drawn;
+    drawn = new Map(MEAL_STEPS.map((step) => [step.key, view.entry.meals[step.key]]));
+    if (!before) return;
+    for (const [key, value] of drawn) {
+      const rowEl = list.querySelector(`[data-meal="${key}"]`);
+      if (rowEl && before.get(key) !== value) replay(rowEl, 'is-changed');
+    }
+  };
 }
 
 /**

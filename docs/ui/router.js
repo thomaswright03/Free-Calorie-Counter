@@ -154,4 +154,33 @@ export function updateTabs() {
     if (tab instanceof HTMLElement && tab.dataset.tab === active) tab.setAttribute('aria-current', 'page');
     else tab.removeAttribute('aria-current');
   });
+  moveTabIndicator(active);
+}
+
+/**
+ * The highlight behind the open tab, which slides from tab to tab (see
+ * .tab-indicator in style.css). Screens without a tab (Settings) hide it.
+ * @param {string} active
+ */
+function moveTabIndicator(active) {
+  const tabs = document.querySelector('.tabs');
+  if (!(tabs instanceof HTMLElement)) return;
+  const existing = tabs.querySelector('.tab-indicator');
+  const indicator = existing instanceof HTMLElement ? existing : addTabIndicator(tabs);
+  const links = Array.from(tabs.querySelectorAll('.tab'));
+  const index = links.findIndex((tab) => tab instanceof HTMLElement && tab.dataset.tab === active);
+  if (index >= 0) indicator.style.setProperty('--tab', String(index));
+  indicator.classList.toggle('is-on', index >= 0);
+}
+
+/** @param {HTMLElement} tabs */
+function addTabIndicator(tabs) {
+  const indicator = document.createElement('span');
+  indicator.className = 'tab-indicator';
+  indicator.setAttribute('aria-hidden', 'true');
+  tabs.prepend(indicator);
+  tabs.classList.add('has-indicator');
+  // Placed without sliding on launch; it slides from then on.
+  requestAnimationFrame(() => requestAnimationFrame(() => tabs.classList.add('is-ready')));
+  return indicator;
 }
