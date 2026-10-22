@@ -40,6 +40,11 @@ IndexedDB on the user's device. No account, server, ads or analytics.
 - Old-address copy shows a "moving" backup card on Today (`docs/ui/new-address.js`, `backup-reminder.js`); owner steps in REFERENCE.md *Moving to the new address*.
 - Red main fixed: modulepreload for build/app.js (the CSP meta stopped Chromium preloading it, +2 s on slow 3G); erase-all, problem-log (CSP blocks inline test script) and Latest Update e2e tests updated.
 
+## Per-food meal logging (2026-10-22)
+- Each meal: "Type the total" or "Food by food" on Log Meal (`docs/ui/log-boxes.js`, `docs/ui/log-foods.js`). Last choice remembered per device (`fcc:mealMode`) for meals not logged yet.
+- Data: entry gains optional `foods: { meal: [{ name, calories }] }`; `meals[key]` is always their sum (core/entries.js). Typing a total drops that meal's foods. Old days and backups have no `foods` and read unchanged; backup version stays 2.
+- Tests: test/unit/foods.test.js, test/e2e/foods.spec.js.
+
 ## Decisions
 - Goal is a per-device pref (`fcc:dailyGoal`), not part of the entries blob.
 - Units stay US-only (lbs); kg support not built.

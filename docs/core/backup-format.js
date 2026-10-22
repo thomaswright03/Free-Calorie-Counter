@@ -7,13 +7,16 @@
 'use strict';
 
 const { isValidDateStr, isFutureDate, daysBetween, localDateStr } = require('./dates.js');
-const { MEAL_KEYS, isEntryEmpty, roundWeight } = require('./entries.js');
+const { MEAL_KEYS, isEntryEmpty, roundWeight, mealFoods } = require('./entries.js');
 const { validateIncomingEntry } = require('./input.js');
 const { sniffImageType } = require('./photos.js');
 
 // Backup file (version 2):
 //   { app: "free-calorie-counter", version: 2, exportedAt, entries: { "YYYY-MM-DD": entry },
 //     photos: [ { date, createdAt, type, data /* base64 */ } ] }
+// An entry's optional `foods` ({ meal: [ { name, calories } ] }) lists the
+// foods of meals logged one food at a time; versions before it read just
+// the meal totals.
 // Version-1 files (entries only, no "app"/"version") still import.
 
 const BACKUP_VERSION = 2;
@@ -27,7 +30,10 @@ const MAX_BACKUP_ISSUES_SHOWN = 1;
 // for 165.333), so every backup this version makes can be imported again.
 /** @param {Entry} entry @returns {Entry} */
 function entryForBackup(entry) {
-  return { date: entry.date, weight: entry.weight === null ? null : roundWeight(entry.weight), meals: { ...entry.meals } };
+  /** @type {Entry} */
+  const out = { date: entry.date, weight: entry.weight === null ? null : roundWeight(entry.weight), meals: { ...entry.meals } };
+  if (entry.foods) out.foods = JSON.parse(JSON.stringify(entry.foods));
+  return out;
 }
 
 // A photo's identity across devices and backups is the time it was first
@@ -173,7 +179,10 @@ function parseBackup(input, latestDay) {
 
 /** @param {Entry} a @param {Entry} b */
 function sameEntry(a, b) {
-  return a.weight === b.weight && MEAL_KEYS.every((k) => (a.meals[k] ?? null) === (b.meals[k] ?? null));
+  return (
+    a.weight === b.weight &&
+    MEAL_KEYS.every((k) => (a.meals[k] ?? null) === (b.meals[k] ?? null) && JSON.stringify(mealFoods(a, k)) === JSON.stringify(mealFoods(b, k)))
+  );
 }
 
 /**

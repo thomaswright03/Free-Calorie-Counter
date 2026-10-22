@@ -558,6 +558,34 @@ input.visually-hidden:focus-visible + .file-btn { outline: 3px solid var(--focus
   color: var(--muted);
 }
 
+/* Type the total, or add foods one at a time. */
+.log-mode { margin: 0 0 var(--s3); }
+
+.foods-panel { margin-bottom: var(--s3); }
+.food-list { list-style: none; margin: 0 0 var(--s2); padding: 0; }
+.food-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  min-height: var(--tap);
+  border-bottom: 1px solid var(--border);
+}
+.food-name { flex: 1; min-width: 0; overflow-wrap: anywhere; font-size: var(--fs-md); }
+.food-cal { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.food-sum { margin: 0 0 var(--s3); font-size: var(--fs-sm); font-weight: 600; color: var(--muted); }
+.food-add .field-row { grid-template-columns: 3fr 2fr; margin-bottom: 0; }
+.food-add .field-status { margin-bottom: var(--s2); }
+.food-add-btn { width: 100%; margin-top: var(--s2); }
+
+/* Today: a meal logged food by food names its foods under its total. */
+.meal-foods {
+  font-size: var(--fs-sm);
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* ------------------------------------------------------------ history */
 
 .history-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--s2); }
