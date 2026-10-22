@@ -68,3 +68,7 @@ WebKit job runs in CI only. Rebuild with `npm run build` after editing `docs/` (
 - Added CSP + `referrer: no-referrer` meta to `docs/admin/index.html` (script hash), referrer meta on all pages; unit test covers admin page.
 - Backup import refuses files over 200 MB (`MAX_BACKUP_BYTES`, backup-file.js).
 - Still owner-only: Pages source → GitHub Actions (live site stale), custom domain DNS (calories.wright-ai-solutions.com), admin bypass on branch protection. Unit/e2e not fully run here (dev deps missing in the sandbox; the store-local-photos test needs fake-indexeddb).
+
+## Security fix round 2 (2026-10-22, after grade 85)
+- index.html inline script redirects http: to https: (CSP hash updated); Latest Update refreshed; CI checkout fetch-depth 0.
+- Still owner-only: tick Enforce HTTPS in Pages, admin-bypass in branch protection.
