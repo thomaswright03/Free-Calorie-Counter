@@ -6,8 +6,8 @@
 <meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
-<meta name="theme-color" content="#f1f5f9" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f6f4ee" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#070a12" media="(prefers-color-scheme: dark)">
 <meta name="robots" content="noindex">
 <title>Page not found · Free Calorie Counter</title>
 <link rel="icon" id="icon" href="favicon.svg" type="image/svg+xml">
@@ -25,25 +25,25 @@
   /* The same colours as the app's light and dark themes (style.css). */
   :root {
     color-scheme: light;
-    --bg: #f1f5f9;
+    --bg: #f6f4ee;
     --card: #ffffff;
-    --text: #0f172a;
-    --muted: #475569;
+    --text: #14161f;
+    --muted: #555b6e;
     --accent: #15803d;
-    --accent-text: #15803d;
+    --accent-text: #166534;
     --on-accent: #ffffff;
-    --focus: #2563eb;
+    --focus: #6d28d9;
   }
   :root[data-theme='dark'] {
     color-scheme: dark;
-    --bg: #0f172a;
-    --card: #1e293b;
-    --text: #f1f5f9;
-    --muted: #94a3b8;
-    --accent: #22c55e;
-    --accent-text: #4ade80;
-    --on-accent: #052e16;
-    --focus: #60a5fa;
+    --bg: #070a12;
+    --card: #121828;
+    --text: #eef2ff;
+    --muted: #9aa6bf;
+    --accent: #a3e635;
+    --accent-text: #bef264;
+    --on-accent: #0a1a03;
+    --focus: #c4b5fd;
   }
   * { box-sizing: border-box; }
   body {
@@ -55,16 +55,16 @@
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     line-height: 1.45;
   }
-  .card { max-width: 420px; margin: 0 auto; padding: 24px 16px; border-radius: 16px; background: var(--card); text-align: center; }
+  .card { max-width: 420px; margin: 0 auto; padding: 28px 20px; border-radius: 24px; background: var(--card); text-align: center; box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.45); }
   .brand { margin: 0 0 8px; font-size: 14px; font-weight: 700; letter-spacing: 0.04em; color: var(--accent-text); }
-  h1 { margin: 0 0 8px; font-size: 20px; }
+  h1 { margin: 0 0 8px; font-size: 24px; letter-spacing: -0.02em; }
   p { margin: 0 0 16px; color: var(--muted); font-size: 14px; }
   .btn {
     display: flex;
     align-items: center;
     justify-content: center;
     min-height: 44px;
-    border-radius: 12px;
+    border-radius: 999px;
     background: var(--accent);
     color: var(--on-accent);
     font-weight: 600;

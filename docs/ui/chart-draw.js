@@ -3,7 +3,7 @@
 // dots, and a tooltip for touch, mouse and keyboard. Over a long range the
 // chart plots weekly or monthly averages instead of every day.
 
-import { core, h, svg, today } from './dom.js';
+import { core, h, svg, today, uid } from './dom.js';
 
 /**
  * @typedef {{ date: string, value: number }} Point
@@ -169,11 +169,24 @@ function drawAxes(chart, s, frame) {
  * @param {Scale} s
  */
 function drawLines(chart, plotted, s) {
+  // A soft glow fills the space under each stretch of line, fading to the
+  // bottom of the chart.
+  const glow = uid('area');
+  const gradient = svg('linearGradient', { id: glow, x1: 0, y1: 0, x2: 0, y2: 1 });
+  gradient.append(svg('stop', { class: 'area-stop-top', offset: 0 }), svg('stop', { class: 'area-stop-bottom', offset: 1 }));
+  const defs = svg('defs');
+  defs.append(gradient);
+  chart.append(defs);
   /** @type {string[]} */
   let solid = [];
   const flush = () => {
-    // pathLength 1 lets the line draw itself in (style.css) whatever its length.
-    if (solid.length > 1) chart.append(svg('polyline', { class: 'line', points: solid.join(' '), pathLength: 1 }));
+    if (solid.length > 1) {
+      const first = solid[0].split(',')[0];
+      const last = solid[solid.length - 1].split(',')[0];
+      chart.append(svg('polygon', { class: 'area', fill: `url(#${glow})`, points: `${first},${s.bottom} ${solid.join(' ')} ${last},${s.bottom}` }));
+      // pathLength 1 lets the line draw itself in (style.css) whatever its length.
+      chart.append(svg('polyline', { class: 'line', points: solid.join(' '), pathLength: 1 }));
+    }
     solid = [];
   };
   /** @type {Plotted | null} */

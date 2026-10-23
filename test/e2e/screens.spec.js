@@ -345,10 +345,10 @@ test('dark is the default theme, and Light or System can be chosen instead', asy
   // Dark even on a device set to light, until a theme is chosen.
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   const bg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
-  expect(bg).toBe('rgb(15, 23, 42)');
+  expect(bg).toBe('rgb(7, 10, 18)');
   const scheme = await page.evaluate(() => getComputedStyle(document.body).colorScheme);
   expect(scheme).toBe('dark');
-  expect(await page.locator('meta[name="theme-color"]').first().getAttribute('content')).toBe('#0f172a');
+  expect(await page.locator('meta[name="theme-color"]').first().getAttribute('content')).toBe('#070a12');
   await page.goto(`${appURL}/#/settings`);
   await expect(page.locator('input[type=radio][value="dark"]')).toBeChecked();
   await page.locator('label', { hasText: 'Light' }).click();

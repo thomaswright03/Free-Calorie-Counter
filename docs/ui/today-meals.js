@@ -5,7 +5,7 @@
 
 import { getGoal, showGoalLine, showGoalMeter, focusGoalOnNextSettings } from './goal.js';
 import { countTo, replay } from './motion.js';
-import { core, h, MEAL_STEPS, mealLabel, today, notSavedReason } from './dom.js';
+import { core, h, svg, uid, MEAL_STEPS, mealLabel, today, notSavedReason } from './dom.js';
 import { failureText } from './problems.js';
 import { toast, announce } from './feedback.js';
 import { store } from './store.js';
@@ -148,9 +148,33 @@ export function buildMealList(view, where) {
 }
 
 /**
+ * The ring around the day's total: a faint dial, and the arc that fills
+ * toward the goal (the goal meter, hidden when no goal is set).
+ * @returns {{ ring: HTMLElement, meter: HTMLElement }}
+ */
+function goalRing() {
+  const grad = uid('ring-grad');
+  /** @param {string} cls */
+  const circle = (cls) => svg('circle', { class: cls, cx: 60, cy: 60, r: 52, pathLength: 1 });
+  const arc = svg('svg', { class: 'ring-svg', viewBox: '0 0 120 120', 'aria-hidden': 'true', focusable: 'false' });
+  const defs = svg('defs');
+  const gradient = svg('linearGradient', { id: grad, x1: 0, y1: 0, x2: 1, y2: 1 });
+  gradient.append(svg('stop', { class: 'ring-stop-a', offset: 0 }), svg('stop', { class: 'ring-stop-b', offset: 1 }));
+  defs.append(gradient);
+  const fill = circle('goal-meter-fill');
+  fill.setAttribute('stroke', `url(#${grad})`);
+  arc.append(defs, fill);
+  const track = svg('svg', { class: 'ring-svg', viewBox: '0 0 120 120', 'aria-hidden': 'true', focusable: 'false' });
+  track.append(circle('ring-track'));
+  const meter = h('div', { class: 'goal-meter is-fresh', 'aria-hidden': 'true' }, arc);
+  const ring = h('div', { class: 'total-ring', 'aria-hidden': 'true' }, h('span', { class: 'ring-dial' }), track, meter, h('span', { class: 'ring-sparks' }, h('span'), h('span'), h('span'), h('span'), h('span'), h('span')));
+  return { ring, meter };
+}
+
+/**
  * The day's total: the number, which counts up from the total shown
  * before (from zero when the screen opens), what it is, the goal line and
- * the bar that fills toward the goal.
+ * the ring that fills toward the goal.
  * @param {import('./today-weight.js').DayView} view
  * @param {{ isToday: boolean }} where
  * @returns {{ el: HTMLElement, refresh: () => void }}
@@ -161,14 +185,17 @@ function buildTotal(view, where) {
   const goalLine = h('div', { class: 'total-goal', 'data-goal-progress': '' });
   const setGoalLink = h('a', { class: 'set-goal-link', href: '#/settings', text: 'Set a daily goal' });
   setGoalLink.addEventListener('click', focusGoalOnNextSettings);
-  const meter = h('div', { class: 'goal-meter is-fresh', 'aria-hidden': 'true' }, h('span', { class: 'goal-meter-fill' }));
-  // The bar fills from empty when the screen opens, then glides on each change.
+  const { ring, meter } = goalRing();
+  // The ring fills from empty when the screen opens, then glides on each change.
   setTimeout(() => meter.classList.remove('is-fresh'), 1200);
   let shown = 0;
   function refresh() {
     const total = core.totalCalories(view.entry.meals);
     if (total === null) num.textContent = '0';
-    else countTo(num, shown, total, core.formatNumber);
+    else if (total !== shown) {
+      countTo(num, shown, total, core.formatNumber);
+      replay(ring, 'is-burst');
+    } else num.textContent = core.formatNumber(total);
     shown = total === null ? 0 : total;
     const when = where.isToday ? 'today' : core.formatDate(view.date, today());
     label.textContent =
@@ -177,7 +204,8 @@ function buildTotal(view, where) {
     showGoalMeter(meter, total);
     setGoalLink.hidden = getGoal() !== null;
   }
-  return { el: h('div', { class: 'total-box' }, num, label, goalLine, setGoalLink, meter), refresh };
+  const center = h('div', { class: 'total-center' }, num, h('span', { class: 'total-unit', 'aria-hidden': 'true', text: 'cal' }));
+  return { el: h('div', { class: 'total-box' }, h('div', { class: 'total-hero' }, ring, center), label, goalLine, setGoalLink), refresh };
 }
 
 /**
@@ -220,6 +248,7 @@ function mealRow(step, value, foods, removedValue, actions) {
   const link = h(
     'a',
     { class: 'meal-link', href: actions.href, 'aria-label': logged ? `Edit ${step.label}, ${core.formatCalories(value)}${foodNames ? `: ${foodNames}` : ''}` : `Add ${step.label}` },
+    h('span', { class: 'meal-icon', 'aria-hidden': 'true' }),
     h('span', { class: 'meal-info' }, h('span', { class: 'meal-name', text: step.label }), shown, foodNames ? h('span', { class: 'meal-foods', text: foodNames }) : null),
     h('span', { class: `meal-go btn-text${logged ? '' : ' btn-quiet'}`, 'aria-hidden': 'true', text: logged ? 'Edit' : 'Add' })
   );

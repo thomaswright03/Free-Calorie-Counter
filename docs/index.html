@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Free Calorie Counter</title>
 <meta name="description" content="A private calorie and weight tracker. Your data stays on your device.">
-<meta name="theme-color" content="#f1f5f9" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f6f4ee" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#070a12" media="(prefers-color-scheme: dark)">
 <meta name="color-scheme" content="light dark">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -54,18 +54,20 @@
 <link rel="modulepreload" href="build/app.js">
 </head>
 <body>
+<div class="ambient" aria-hidden="true"><span class="ambient-blob ambient-a"></span><span class="ambient-blob ambient-b"></span><span class="ambient-blob ambient-c"></span></div>
+
 <div class="app">
 
   <header class="topbar">
     <div class="brand-block">
-      <h1 class="brand">Free Calorie Counter</h1>
+      <h1 class="brand"><img class="brand-logo" src="favicon.svg" alt="" width="36" height="36"><span class="brand-name">Free Calorie Counter</span></h1>
       <p class="tagline">Calorie &amp; weight tracker</p>
     </div>
     <nav class="tabs" aria-label="Main">
-      <a class="tab" href="#/" data-tab="today">Today</a>
-      <a class="tab" href="#/history" data-tab="history">History</a>
-      <a class="tab" href="#/compare" data-tab="compare">Compare</a>
-      <a class="tab" href="#/photos" data-tab="photos">Photos</a>
+      <a class="tab" href="#/" data-tab="today"><svg class="tab-icon" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 2.5c.8 3.6 5.5 5.8 5.5 11a5.5 5.5 0 0 1-11 0c0-2.3 1-3.9 2.2-5 .4 2 1.6 3.2 3 3.4-.8-3.2.1-6.3.3-9.4z"/></svg><span class="tab-label">Today</span></a>
+      <a class="tab" href="#/history" data-tab="history"><svg class="tab-icon" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M6 4.5h12a2.5 2.5 0 0 1 2.5 2.5v11a2.5 2.5 0 0 1-2.5 2.5H6A2.5 2.5 0 0 1 3.5 18V7A2.5 2.5 0 0 1 6 4.5zM3.5 9.5h17M8 2.5v4M16 2.5v4M8 13.5h2M14 13.5h2M8 17h2"/></svg><span class="tab-label">History</span></a>
+      <a class="tab" href="#/compare" data-tab="compare"><svg class="tab-icon" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M5 20.5v-6M12 20.5V4M19 20.5V10M2.5 20.5h19"/></svg><span class="tab-label">Compare</span></a>
+      <a class="tab" href="#/photos" data-tab="photos"><svg class="tab-icon" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4.5 7.5h3l1.8-2.5h5.4l1.8 2.5h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-15a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2zM12 17a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/></svg><span class="tab-label">Photos</span></a>
     </nav>
     <a class="settings-link" href="#/settings" data-tab="settings">
       <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">

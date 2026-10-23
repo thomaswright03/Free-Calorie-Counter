@@ -54,7 +54,7 @@ test('an unknown page on the site shows Free Calorie Counter’s “Page not fou
   // Dark until a theme is chosen, whatever the device is set to.
   await page.emulateMedia({ colorScheme: 'light' });
   await page.goto(`${appURL}/nope/deeper`);
-  expect(await page.evaluate(() => getComputedStyle(document.body).backgroundColor)).toBe('rgb(15, 23, 42)');
+  expect(await page.evaluate(() => getComputedStyle(document.body).backgroundColor)).toBe('rgb(7, 10, 18)');
   // With System chosen in Settings, it follows the device.
   await page.evaluate(() => localStorage.setItem('fcc:theme', 'system'));
   for (const scheme of ['light', 'dark']) {
@@ -63,7 +63,7 @@ test('an unknown page on the site shows Free Calorie Counter’s “Page not fou
     expect(res.status()).toBe(404);
     await expect(page.getByRole('heading', { name: 'Page not found' })).toBeVisible();
     const bg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
-    expect(bg).toBe(scheme === 'light' ? 'rgb(241, 245, 249)' : 'rgb(15, 23, 42)');
+    expect(bg).toBe(scheme === 'light' ? 'rgb(246, 244, 238)' : 'rgb(7, 10, 18)');
   }
   // The icon links point at the app's own files from any depth.
   const icon = await page.locator('link[rel="icon"]').evaluate((l) => l.href);

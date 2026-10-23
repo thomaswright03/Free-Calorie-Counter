@@ -49,6 +49,12 @@ IndexedDB on the user's device. No account, server, ads or analytics.
 - Framing blocked: early script in docs/index.html stops loading when framed and shows a link; CSP hash updated; test/e2e/framing.spec.js.
 - Rest is Thomas-only: Enforce HTTPS in Pages, admin bypass of branch protection.
 
+## Visual redesign (2026-10-23)
+- New look across the app: "midnight orchard" dark (bg #070a12, lime + violet light) and "morning orchard" light (bg #f6f4ee). All colours are tokens at the top of `docs/style.css` (a unit test enforces it); the body backgrounds are mirrored in theme.js, the manifest, 404.html, legal.css and the theme-color metas.
+- Display face Bricolage Grotesque, self-hosted at `docs/fonts/` (OFL, licence beside it), pre-cached by the service worker; body text stays in the system font.
+- Header logo and tab icons (`docs/index.html`), glass cards over a fixed drifting background (`.ambient`), the goal ring round Today's total (`today-meals.js` goalRing; `.goal-meter` is now the ring's arc), per-meal gradient icons (CSS masks keyed on `data-meal`), area glow under chart lines (`chart-draw.js`).
+- Motion: never-ending loops are named `ambient-*` (background) or `walk-*` (walkthrough); motion.spec.js ignores `ambient-*` when waiting for a screen to settle.
+
 ## Decisions
 - Goal is a per-device pref (`fcc:dailyGoal`), not part of the entries blob.
 - Units stay US-only (lbs); kg support not built.
