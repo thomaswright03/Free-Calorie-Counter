@@ -4,7 +4,7 @@
 import { prefs } from './dom.js';
 
 // The page background (--bg in style.css) of each theme.
-const THEME_COLORS = { light: '#f1f5f9', dark: '#0f172a' };
+const THEME_COLORS = { light: '#f6f4ee', dark: '#070a12' };
 /** The theme for anyone who hasn't chosen one in Settings. */
 export const DEFAULT_THEME = 'dark';
 

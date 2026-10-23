@@ -30,7 +30,7 @@ export function showGoalLine(el, total) {
 }
 
 /**
- * Fills the goal meter under a day's total: how much of the goal the day's
+ * Fills the goal ring around a day's total: how much of the goal the day's
  * calories use, full (and red) once over it. Hidden when no goal is set.
  * @param {HTMLElement} el
  * @param {number | null} total
@@ -41,6 +41,7 @@ export function showGoalMeter(el, total) {
   if (goal === null) return;
   const used = total === null ? 0 : total / goal;
   el.classList.toggle('is-over', used > 1);
+  el.classList.toggle('is-empty', used <= 0);
   el.style.setProperty('--p', Math.min(1, Math.max(0, used)).toFixed(4));
 }
 

@@ -53,6 +53,7 @@ export function mealPicker(onPick) {
     const pill = h(
       'button',
       { type: 'button', 'data-meal': step.key, onClick: () => onPick(step.key) },
+      h('span', { class: 'meal-icon', 'aria-hidden': 'true' }),
       h('span', { class: 'pill-label', text: step.label }),
       h('span', { class: 'pill-value', 'aria-hidden': 'true' })
     );

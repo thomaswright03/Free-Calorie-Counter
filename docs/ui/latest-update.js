@@ -5,13 +5,16 @@
 // than the newest commit that touched docs/, or the list grows past 6.
 
 export const LATEST_UPDATE = {
-  date: '2026-10-22',
+  date: '2026-10-23',
   summary:
-    'Security tightening. Backups larger than 200 MB are now refused with a message, and opening the app over a plain http address now sends you to the secure https address. Nothing you logged changes.',
+    'A new look. The whole app has been redesigned, with new colours, a new typeface and much more movement. Everything works the same way and nothing you logged changes.',
   /** What you can see in the app, listed first. */
   frontend: [
-    'Importing a backup larger than 200 MB is refused with a clear message instead of freezing the phone.',
-    'Opening the app at an http:// address now moves you to the secure https:// address.',
-    'If another website tries to show the app inside its own page, you now get a link to open it on its own instead.',
+    'Dark mode is now a deep midnight blue lit by soft lime and violet light that drifts slowly behind the app. Light mode is warm paper with pastel light.',
+    'Today’s total sits inside a ring that fills toward your daily goal, and sparks fly off it when the total changes.',
+    'Each meal has its own colourful picture: a sunrise for breakfast, the sun for lunch, the moon for dinner and more for snacks.',
+    'The tabs have icons, and the highlight springs from tab to tab.',
+    'Graphs glow under their lines, and the line draws itself in when a graph first shows.',
+    'The Home Screen walkthrough has the new look too. If your phone is set to reduce motion, nothing moves.',
   ],
 };

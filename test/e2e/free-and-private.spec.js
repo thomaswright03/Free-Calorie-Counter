@@ -36,7 +36,7 @@ test('the privacy policy and terms follow the app’s theme', async ({ page, app
   // Dark until a theme is chosen, whatever the device is set to.
   await page.emulateMedia({ colorScheme: 'light' });
   await page.goto(`${appURL}/privacy.html`);
-  expect(await page.evaluate(() => getComputedStyle(document.body).backgroundColor)).toBe('rgb(15, 23, 42)');
+  expect(await page.evaluate(() => getComputedStyle(document.body).backgroundColor)).toBe('rgb(7, 10, 18)');
   // With System chosen in Settings, they follow the device.
   await page.evaluate(() => localStorage.setItem('fcc:theme', 'system'));
   for (const scheme of ['light', 'dark']) {
@@ -44,7 +44,7 @@ test('the privacy policy and terms follow the app’s theme', async ({ page, app
     for (const name of ['privacy.html', 'terms.html']) {
       await page.goto(`${appURL}/${name}`);
       const bg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
-      expect(bg, `${name} ${scheme}`).toBe(scheme === 'light' ? 'rgb(241, 245, 249)' : 'rgb(15, 23, 42)');
+      expect(bg, `${name} ${scheme}`).toBe(scheme === 'light' ? 'rgb(246, 244, 238)' : 'rgb(7, 10, 18)');
     }
   }
 });

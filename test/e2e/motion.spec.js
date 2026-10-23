@@ -6,13 +6,13 @@ const { test, expect, TODAY, day } = require('./fixtures');
 
 const YESTERDAY = '2026-09-23';
 
-/** Animations still running on the page, apart from the loading spinner. */
+/** Animations still running on the page, apart from the loading spinner and the background's slow drift (ambient-…). */
 const running = (page) =>
   page.evaluate(() =>
     document
       .getAnimations()
       .filter((a) => a.playState === 'running')
-      .filter((a) => !(a instanceof CSSAnimation && a.animationName === 'spin')).length
+      .filter((a) => !(a instanceof CSSAnimation && (a.animationName === 'spin' || a.animationName.startsWith('ambient-')))).length
   );
 
 const settled = (page) => expect.poll(() => running(page), { timeout: 5000 }).toBe(0);
@@ -50,7 +50,7 @@ test.describe('with motion allowed', () => {
     await expect(indicator).not.toHaveClass(/is-on/);
   });
 
-  test('the day’s total counts up to its exact value, the goal bar fills, and a removed meal’s row flashes', async ({ page, appURL, data }) => {
+  test('the day’s total counts up to its exact value, the goal ring fills, and a removed meal’s row flashes', async ({ page, appURL, data }) => {
     await data.seed({ [TODAY]: day(TODAY, { breakfast: 450, lunch: 600 }) });
     await page.evaluate(() => localStorage.setItem('fcc:dailyGoal', '2100'));
     await page.goto(appURL);
@@ -58,7 +58,8 @@ test.describe('with motion allowed', () => {
     await expect(total).toHaveClass(/is-counting/);
     await expect(total).toHaveText('1,050');
     await settled(page);
-    const share = await page.locator('.goal-meter-fill').evaluate((el) => el.getBoundingClientRect().width / el.parentElement.getBoundingClientRect().width);
+    // The ring's arc is drawn on a path of length 1: what's left undrawn is 1 minus the share of the goal used.
+    const share = await page.locator('.goal-meter-fill').evaluate((el) => 1 - Number(/[\d.]+/.exec(getComputedStyle(el).strokeDashoffset)[0]));
     expect(share).toBeCloseTo(0.5, 2);
     await page.getByRole('button', { name: 'Remove Breakfast' }).click();
     await expect(page.locator('[data-meal="breakfast"]')).toHaveClass(/is-changed/);
