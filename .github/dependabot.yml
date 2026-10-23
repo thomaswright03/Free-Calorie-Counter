@@ -1,10 +1,35 @@
 version: 2
 updates:
+  # Small npm updates (minor and patch) arrive together as one pull request
+  # a month. Major versions (such as TypeScript 7 or ESLint 10) can change
+  # how the code is checked, so they are left for a deliberate upgrade.
+  # Security fixes still arrive on their own, whenever they are published.
   - package-ecosystem: npm
     directory: /
     schedule:
-      interval: weekly
+      interval: monthly
+    groups:
+      npm-updates:
+        update-types:
+          - minor
+          - patch
+    ignore:
+      - dependency-name: '*'
+        update-types:
+          - version-update:semver-major
+      # Each Playwright minor release brings new browser builds, and 1.64
+      # made several WebKit tests time out, so it is upgraded by hand.
+      - dependency-name: '@playwright/test'
+        update-types:
+          - version-update:semver-minor
+
+  # The GitHub Actions the tests and deploy use, all in one pull request a
+  # month, so the tests check them together.
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: weekly
+      interval: monthly
+    groups:
+      github-actions:
+        patterns:
+          - '*'
