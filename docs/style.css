@@ -46,6 +46,8 @@
 
   /* light theme: morning orchard, warm paper with pastel light */
   color-scheme: light;
+  --video-bg: #05070d;
+  --video-ink: #ffffff;
   --bg: #f6f4ee;
   --card: rgba(255, 255, 255, 0.86);
   --card-solid: #ffffff;
@@ -117,6 +119,8 @@
 :root[data-theme='dark'] {
   /* dark theme: midnight orchard, deep ink lit by lime and violet */
   color-scheme: dark;
+  --video-bg: #05070d;
+  --video-ink: #ffffff;
   --bg: #070a12;
   --card: rgba(18, 24, 40, 0.72);
   --card-solid: #121828;
@@ -1497,21 +1501,32 @@ body.is-install-gate .settings-link { display: none; }
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: var(--s2);
+  justify-content: flex-end;
+  gap: var(--s1);
   width: 260px;
   height: 160px;
-  padding: var(--s3);
+  margin: 0;
+  padding: 0 0 var(--s2);
+  overflow: hidden;
   border-radius: var(--r-lg);
-  border: 2px dashed color-mix(in srgb, var(--accent) 40%, var(--border));
-  background:
-    radial-gradient(80% 80% at 20% 10%, color-mix(in srgb, var(--accent) 26%, transparent), transparent 60%),
-    radial-gradient(80% 80% at 90% 100%, color-mix(in srgb, var(--chart-weight) 30%, transparent), transparent 60%),
-    var(--card-2);
+  border: 2px solid color-mix(in srgb, var(--accent) 45%, var(--border));
+  background: var(--video-bg);
+  color: var(--video-ink);
+  font: inherit;
+  cursor: pointer;
+  box-shadow: var(--shadow-card);
 }
+.walk-video-poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.walk-video > .walk-play,
+.walk-video > .walk-video-text { position: relative; }
+.walk-video > .walk-play { width: 48px; height: 48px; }
 .walk-play { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; color: var(--on-accent); background: var(--accent); background-image: var(--grad-accent); box-shadow: 0 10px 26px -6px var(--glow-accent); }
 .walk-play svg { margin-left: 3px; }
-.walk-video-text { font-size: var(--fs-sm); font-weight: 600; color: var(--muted); }
+.walk-video-text { font-size: var(--fs-sm); font-weight: 700; color: var(--video-ink); text-shadow: 0 1px 8px var(--scrim); }
+.dialog-video { width: min(440px, calc(100vw - var(--s4))); max-height: calc(100vh - var(--s4)); background: var(--video-bg); }
+.video-body { display: grid; gap: var(--s3); padding: var(--s3); }
+.mission-video { display: block; width: 100%; height: auto; max-height: calc(100vh - 150px); border-radius: 18px; background: var(--video-bg); }
+.video-body .btn { margin: 0; }
 .walk-sparks > span { position: absolute; top: 50%; left: 50%; width: 6px; height: 6px; margin: -3px; border-radius: 50%; background: var(--warning-border); opacity: 0; }
 
 /* A day far back enough that its year was probably mistyped, and other
