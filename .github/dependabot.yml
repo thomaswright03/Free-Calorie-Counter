@@ -17,6 +17,11 @@ updates:
       - dependency-name: '*'
         update-types:
           - version-update:semver-major
+      # Each Playwright minor release brings new browser builds, and 1.64
+      # made several WebKit tests time out, so it is upgraded by hand.
+      - dependency-name: '@playwright/test'
+        update-types:
+          - version-update:semver-minor
 
   # The GitHub Actions the tests and deploy use, all in one pull request a
   # month, so the tests check them together.
