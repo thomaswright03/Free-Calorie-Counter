@@ -15,7 +15,7 @@
 // which pre-caches the whole new set together, so a phone that goes offline
 // right after an update still has matching files. A test checks every
 // listed file exists.
-const CACHE_NAME = 'fcc-b55c00591c91';
+const CACHE_NAME = 'fcc-b4eb2782032f';
 
 const APP_SHELL = [
   './',
@@ -91,6 +91,9 @@ sw.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
   if (request.method !== 'GET' || url.origin !== sw.location.origin) return;
+  // The mission video streams in ranges and is only watched online: the
+  // browser fetches it itself, and no partial copy ends up in the cache.
+  if (url.pathname.includes('/video/')) return;
 
   /** @type {Promise<unknown>} */
   let stored = Promise.resolve();

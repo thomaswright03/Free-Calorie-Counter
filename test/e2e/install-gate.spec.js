@@ -49,10 +49,31 @@ test.describe('new user on iPhone, in a Safari tab', () => {
     await expect(page.getByLabel('Weight (lbs)')).toHaveCount(0);
   });
 
-  test('our mission has a place for its video', async ({ page, appURL }) => {
+  test('our mission plays its video on a tap, with captions, and closes again', async ({ page, appURL }) => {
     await page.goto(appURL);
     await gate(page).getByRole('button', { name: 'Show me how' }).click();
-    await expect(page.locator('[data-mission-video]')).toHaveText('Upload video here. Wait until approval stage for this');
+    const play = page.locator('[data-mission-video]');
+    await expect(play).toHaveAccessibleName(/mission video/);
+    await expect(play.locator('img')).toHaveAttribute('src', 'video/mission-thumb.jpg');
+    await play.click();
+    const dialog = page.getByRole('dialog', { name: 'Our mission video' });
+    await expect(dialog).toBeVisible();
+    const video = dialog.locator('video');
+    await expect(video).toHaveAttribute('controls', '');
+    await expect(video).toHaveAttribute('playsinline', '');
+    await expect(video.locator('source')).toHaveAttribute('src', 'video/mission.mp4');
+    await expect(video.locator('track[kind="captions"]')).toHaveAttribute('src', 'video/mission.vtt');
+    for (const file of ['video/mission.mp4', 'video/mission.vtt', 'video/mission-thumb.jpg', 'video/mission-poster.jpg']) {
+      const response = await page.request.get(`${appURL}/${file}`);
+      expect(response.status(), file).toBe(200);
+    }
+    await dialog.getByRole('button', { name: 'Close' }).click();
+    await expect(dialog).toHaveCount(0);
+    await expect(play).toBeFocused();
+    await play.press('Enter');
+    await expect(page.getByRole('dialog', { name: 'Our mission video' })).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('dialog')).toHaveCount(0);
   });
 
   test('the arrow keys and a swipe move between steps', async ({ page, appURL }) => {

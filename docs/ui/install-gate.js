@@ -7,11 +7,12 @@
 // logged days here (Today's install note asks them to back up first), or at
 // the old address (which asks people to move instead).
 
-import { h, svg, byId, visibleEntries } from './dom.js';
-import { announce } from './feedback.js';
+import { h, svg, byId, uid, visibleEntries } from './dom.js';
+import { announce, openDialog } from './feedback.js';
 import { store } from './store.js';
 import { runningInstalled, onAppleMobile } from './install-note.js';
 import { movingTo } from './new-address.js';
+import { motionAllowed } from './motion.js';
 
 /** Android phone or tablet. */
 function onAndroid() {
@@ -135,16 +136,49 @@ function homeArt() {
   );
 }
 
-/** Where the mission video goes, once it's approved. */
+/**
+ * The mission video's poster with a play button on it. A tap opens the
+ * video at full size, with sound and captions (openMissionVideo).
+ */
 function missionArt() {
   const play = svg('svg', { viewBox: '0 0 24 24', width: 28, height: 28, 'aria-hidden': 'true', focusable: 'false' });
   play.append(svg('path', { d: 'M8 5.5v13l11-6.5z', fill: 'currentColor' }));
-  return h(
-    'div',
-    { class: 'walk-art walk-video', 'data-mission-video': '' },
+  const button = h(
+    'button',
+    { type: 'button', class: 'walk-video', 'data-mission-video': '', 'aria-label': 'Play our mission video, one minute long' },
+    h('img', { class: 'walk-video-poster', src: 'video/mission-thumb.jpg', alt: '', width: 520, height: 320 }),
     h('span', { class: 'walk-play' }, play),
-    h('span', { class: 'walk-video-text', text: 'Upload video here. Wait until approval stage for this' })
+    h('span', { class: 'walk-video-text', 'aria-hidden': 'true', text: 'Watch · 1 min' })
   );
+  button.addEventListener('click', openMissionVideo);
+  return h('div', { class: 'walk-art walk-art-video' }, button);
+}
+
+/**
+ * Opens the mission video in a dialog, with its controls and captions. It
+ * starts right away, since a tap asked for it; a phone set to reduce
+ * motion shows the first frame and waits for the play control instead.
+ */
+function openMissionVideo() {
+  const title = h('h2', { class: 'visually-hidden', id: uid('mission-video'), text: 'Our mission video' });
+  const video = /** @type {HTMLVideoElement} */ (
+    h(
+      'video',
+      { class: 'mission-video', controls: true, playsinline: true, preload: 'metadata', poster: 'video/mission-poster.jpg', width: 540, height: 960 },
+      h('source', { src: 'video/mission.mp4', type: 'video/mp4' }),
+      h('track', { kind: 'captions', src: 'video/mission.vtt', srclang: 'en', label: 'English', default: true })
+    )
+  );
+  const closeBtn = h('button', { type: 'button', class: 'btn btn-secondary', text: 'Close' });
+  const close = openDialog({
+    className: 'dialog-video',
+    labelId: title.id,
+    content: h('div', { class: 'video-body' }, title, video, closeBtn),
+    initialFocus: closeBtn,
+    onClose: () => video.pause(),
+  });
+  closeBtn.addEventListener('click', () => close());
+  if (motionAllowed()) video.play().catch(() => undefined);
 }
 
 /** @typedef {{ label: string, title: string, text: string, art: HTMLElement, add?: boolean }} Slide */
