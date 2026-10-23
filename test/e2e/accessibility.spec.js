@@ -3,20 +3,22 @@ const { test, expect, TODAY, day } = require('./fixtures');
 
 const SCREENS = ['#/', '#/log', '#/history', '#/compare', '#/photos', '#/settings', '#/day/2026-09-20'];
 
-test('no screen has accessibility problems axe can find, in either theme', async ({ page, appURL, data }) => {
-  await data.seed({ '2026-09-20': day('2026-09-20', { dinner: 700 }, 181), [TODAY]: day(TODAY, { breakfast: 400 }, 180) });
-  await page.goto(appURL);
-  for (const theme of ['light', 'dark']) {
-    await page.evaluate((t) => localStorage.setItem('fcc:theme', t), theme);
-    for (const hash of SCREENS) {
+// One test per screen and theme: axe on the full app is slow in WebKit, and a
+// single test for all fourteen ran out of time on a slow runner.
+for (const theme of ['light', 'dark']) {
+  for (const hash of SCREENS) {
+    test(`${hash} has no accessibility problems axe can find, in the ${theme} theme`, async ({ page, appURL, data }) => {
+      await data.seed({ '2026-09-20': day('2026-09-20', { dinner: 700 }, 181), [TODAY]: day(TODAY, { breakfast: 400 }, 180) });
+      await page.goto(appURL);
+      await page.evaluate((t) => localStorage.setItem('fcc:theme', t), theme);
       await page.goto(`${appURL}/${hash}`);
       await page.locator('main h2').first().waitFor();
       const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'best-practice']).analyze();
       const found = results.violations.map((v) => `${hash} (${theme}): ${v.id} — ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`);
       expect(found).toEqual([]);
-    }
+    });
   }
-});
+}
 
 test('the backup save panel, the meal table, the photo viewer and the "Log a day in …?" question have no problems axe can find', async ({ page, appURL, data }) => {
   await data.seed({ [TODAY]: day(TODAY, { breakfast: 400 }, 180) });
