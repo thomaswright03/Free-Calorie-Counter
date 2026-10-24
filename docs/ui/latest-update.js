@@ -5,12 +5,14 @@
 // than the newest commit that touched docs/, or the list grows past 6.
 
 export const LATEST_UPDATE = {
-  date: '2026-10-23',
+  date: '2026-10-24',
   summary:
-    'The Home Screen walkthrough’s “Our mission” step now has our one-minute video: why Free Calorie Counter is free, why nothing you log leaves your phone, and a tour of what it does.',
+    'For someone new, our one-minute mission video now opens full screen by itself in the Home Screen walkthrough and plays with sound; Next appears when it ends.',
   /** What you can see in the app, listed first. */
   frontend: [
-    'The “Our mission” step of the Home Screen walkthrough shows the mission video. Tap its picture to watch it, with sound and captions; Close or Escape puts it away.',
-    'On a phone set to reduce motion the video waits for its play control instead of starting on its own.',
+    'Walkthrough: tapping “Show me how” opens the mission video full screen, with sound and captions, and Next appears once it ends. On iPhone it plays in iPhone’s own full-screen player.',
+    'Walkthrough: the “Our mission” step’s Next waits for the video. Once watched, the video doesn’t open by itself again, and its picture plays it again (Close or Escape puts it away).',
+    'If the video can’t load (offline, say), the walkthrough says so and goes on without it.',
+    'On a phone set to reduce motion the video waits for its play button instead of starting on its own.',
   ],
 };
