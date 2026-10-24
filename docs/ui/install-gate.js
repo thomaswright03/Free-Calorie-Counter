@@ -7,12 +7,12 @@
 // logged days here (Today's install note asks them to back up first), or at
 // the old address (which asks people to move instead).
 
-import { h, svg, byId, uid, visibleEntries } from './dom.js';
-import { announce, openDialog } from './feedback.js';
+import { h, svg, byId, visibleEntries } from './dom.js';
+import { announce } from './feedback.js';
 import { store } from './store.js';
 import { runningInstalled, onAppleMobile } from './install-note.js';
 import { movingTo } from './new-address.js';
-import { motionAllowed } from './motion.js';
+import { missionFilm, missionArt } from './mission-film.js';
 
 /** Android phone or tablet. */
 function onAndroid() {
@@ -136,59 +136,15 @@ function homeArt() {
   );
 }
 
-/**
- * The mission video's poster with a play button on it. A tap opens the
- * video at full size, with sound and captions (openMissionVideo).
- */
-function missionArt() {
-  const play = svg('svg', { viewBox: '0 0 24 24', width: 28, height: 28, 'aria-hidden': 'true', focusable: 'false' });
-  play.append(svg('path', { d: 'M8 5.5v13l11-6.5z', fill: 'currentColor' }));
-  const button = h(
-    'button',
-    { type: 'button', class: 'walk-video', 'data-mission-video': '', 'aria-label': 'Play our mission video, one minute long' },
-    h('img', { class: 'walk-video-poster', src: 'video/mission-thumb.jpg', alt: '', width: 520, height: 320 }),
-    h('span', { class: 'walk-play' }, play),
-    h('span', { class: 'walk-video-text', 'aria-hidden': 'true', text: 'Watch · 1 min' })
-  );
-  button.addEventListener('click', openMissionVideo);
-  return h('div', { class: 'walk-art walk-art-video' }, button);
-}
-
-/**
- * Opens the mission video in a dialog, with its controls and captions. It
- * starts right away, since a tap asked for it; a phone set to reduce
- * motion shows the first frame and waits for the play control instead.
- */
-function openMissionVideo() {
-  const title = h('h2', { class: 'visually-hidden', id: uid('mission-video'), text: 'Our mission video' });
-  const video = /** @type {HTMLVideoElement} */ (
-    h(
-      'video',
-      { class: 'mission-video', controls: true, playsinline: true, preload: 'metadata', poster: 'video/mission-poster.jpg', width: 540, height: 960 },
-      h('source', { src: 'video/mission.mp4', type: 'video/mp4' }),
-      h('track', { kind: 'captions', src: 'video/mission.vtt', srclang: 'en', label: 'English', default: true })
-    )
-  );
-  const closeBtn = h('button', { type: 'button', class: 'btn btn-secondary', text: 'Close' });
-  const close = openDialog({
-    className: 'dialog-video',
-    labelId: title.id,
-    content: h('div', { class: 'video-body' }, title, video, closeBtn),
-    initialFocus: closeBtn,
-    onClose: () => video.pause(),
-  });
-  closeBtn.addEventListener('click', () => close());
-  if (motionAllowed()) video.play().catch(() => undefined);
-}
-
-/** @typedef {{ label: string, title: string, text: string, art: HTMLElement, add?: boolean }} Slide */
+/** @typedef {{ label: string, title: string, text: string, art: HTMLElement, add?: boolean, film?: boolean }} Slide */
 
 /**
  * The walkthrough's slides, for this phone.
  * @param {boolean} apple
+ * @param {() => void} openFilm opens the mission video
  * @returns {Slide[]}
  */
-function slides(apple) {
+function slides(apple, openFilm) {
   return [
     {
       label: 'Before you start',
@@ -202,7 +158,8 @@ function slides(apple) {
       label: 'Our mission',
       title: 'Our mission',
       text: 'Counting calories should be free and private. No account, no ads, no subscription, and your numbers never leave your phone.',
-      art: missionArt(),
+      art: missionArt(openFilm),
+      film: true,
     },
     apple
       ? { label: 'Step 1 of 3', title: 'Tap the Share button', text: 'It’s the square with an arrow in Safari’s toolbar. Don’t see it? Tap ••• first.', art: shareArt() }
@@ -281,7 +238,12 @@ export function renderInstallGate() {
   document.title = 'Add to Home Screen · Free Calorie Counter';
   document.body.classList.add('is-install-gate');
 
-  const steps = slides(apple);
+  // Next at the end of the mission video goes on to the step after it.
+  const film = missionFilm(
+    () => go(steps.findIndex((step) => step.film) + 1),
+    () => show(current)
+  );
+  const steps = slides(apple, () => film.open());
   const slideEls = steps.map((step, i) => slideEl(step, i));
   const dots = steps.map(() => h('span', { class: 'walk-dot' }));
   const backBtn = h('button', { type: 'button', class: 'btn btn-secondary', text: 'Back' });
@@ -305,7 +267,9 @@ export function renderInstallGate() {
     dots.forEach((d, i) => d.classList.toggle('is-past', i < to));
     backBtn.hidden = to === 0;
     const last = to === steps.length - 1;
-    nextBtn.textContent = to === 0 ? 'Show me how' : last ? 'See the steps again' : 'Next';
+    // The mission step's Next waits for its video.
+    nextBtn.disabled = !!steps[to].film && !film.watched;
+    nextBtn.textContent = to === 0 ? 'Show me how' : last ? 'See the steps again' : nextBtn.disabled ? 'Next after the video' : 'Next';
     installBtn.hidden = !(installPrompt && steps[to].add);
     if (focus) {
       const title = slideEls[to].querySelector('.walk-title');
@@ -316,7 +280,9 @@ export function renderInstallGate() {
   /** @param {number} to */
   const go = (to) => {
     if (to < 0 || to >= steps.length || to === current) return;
+    if (to > current && nextBtn.disabled) return;
     show(to, true);
+    if (steps[to].film && !film.watched) film.open();
   };
   backBtn.addEventListener('click', () => go(current - 1));
   nextBtn.addEventListener('click', () => go(current === steps.length - 1 ? steps.findIndex((step) => step.label.startsWith('Step')) : current + 1));
