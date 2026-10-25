@@ -251,6 +251,31 @@ test('backup parsing rejects malformed files with a specific message', () => {
   );
 });
 
+test('backups from before the rename import, with empty meals left empty', () => {
+  const meals = { breakfast: 300, snack1: null, lunch: 450, snack2: null, dinner: 600, snack3: null };
+  const file = {
+    app: 'earlier-name',
+    version: 2,
+    exportedAt: '2026-09-24T10:00:00.000Z',
+    entries: {
+      '2026-09-22': { date: '2026-09-22', weight: 80.4, meals },
+      '2026-09-23': { date: '2026-09-23', weight: null, meals: { breakfast: null, snack1: null, lunch: null, snack2: null, dinner: 500, snack3: null } },
+    },
+    photos: [],
+  };
+  const parsed = core.parseBackup(JSON.stringify(file), '2026-10-01');
+  assert.equal(parsed.ok, true);
+  assert.equal(parsed.dayCount, 2);
+  assert.deepEqual(parsed.skipped, []);
+  assert.equal(parsed.entries['2026-09-22'].weight, 80.4);
+  assert.equal(parsed.entries['2026-09-22'].meals.snack1, null);
+  assert.equal(core.totalCalories(parsed.entries['2026-09-22'].meals), 1350);
+  assert.equal(parsed.entries['2026-09-23'].weight, null);
+
+  // Without a version and export time, a file naming another app is still refused.
+  assert.equal(core.parseBackup(JSON.stringify({ app: 'other', version: 2, entries: {} })).ok, false);
+});
+
 test('a whole backup parses with its days and photos; version-1 files still import', () => {
   const entries = {
     '2026-09-23': entry('2026-09-23', { breakfast: 400 }, 180.2),
