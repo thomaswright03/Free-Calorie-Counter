@@ -18,6 +18,9 @@ const { sniffImageType } = require('./photos.js');
 // foods of meals logged one food at a time; versions before it read just
 // the meal totals.
 // Version-1 files (entries only, no "app"/"version") still import.
+// Backups from the app before it was renamed carry its old name in "app";
+// they're recognised by their shape instead (a numbered version and an
+// export time), since the format itself didn't change.
 
 const BACKUP_VERSION = 2;
 // What backups made by this app say they are.
@@ -45,6 +48,15 @@ function photoKey(p) {
 }
 
 /**
+ * Whether a backup that names another app was made by this one under its
+ * earlier name: same layout, with a version number and an export time.
+ * @param {any} payload
+ */
+function isEarlierAppBackup(payload) {
+  return typeof payload.app === 'string' && typeof payload.version === 'number' && typeof payload.exportedAt === 'string';
+}
+
+/**
  * Checks everything in a backup except its photos: that it's a Free Calorie Counter
  * backup this version can read, and every day in it. A day that can't be
  * restored (a value outside the app's rules) is left out and added to
@@ -59,7 +71,7 @@ function checkBackupDays(payload, skipped, latestDay) {
   if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
     return { ok: false, error: "This file isn't a Free Calorie Counter backup." };
   }
-  if (payload.app !== undefined && payload.app !== BACKUP_APP_ID) {
+  if (payload.app !== undefined && payload.app !== BACKUP_APP_ID && !isEarlierAppBackup(payload)) {
     return { ok: false, error: "This file isn't a Free Calorie Counter backup." };
   }
   if (typeof payload.version === 'number' && payload.version > BACKUP_VERSION) {

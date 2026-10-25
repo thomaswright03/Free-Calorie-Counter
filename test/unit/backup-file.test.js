@@ -122,6 +122,12 @@ test('checking a backup reports problems without importing anything', async () =
   const notOurs = await checkBackup(new Blob([JSON.stringify({ app: 'other', entries: {} })]));
   assert.equal(notOurs.ok, false);
 
+  const earlier = await checkBackup(
+    new Blob([JSON.stringify({ app: 'earlier-name', version: 2, exportedAt: '2026-09-24T10:00:00.000Z', entries: { '2026-09-02': { date: '2026-09-02', weight: 80, meals: { breakfast: 300, lunch: null } } }, photos: [] })])
+  );
+  assert.equal(earlier.ok, true, 'a backup from before the rename imports');
+  assert.equal(earlier.dayCount, 1);
+
   const v1 = await checkBackup(new Blob([JSON.stringify({ exportedAt: 'x', entries: { '2025-05-01': { date: '2025-05-01', weight: 150, meals: {} } } }, null, 2)]));
   assert.equal(v1.ok, true);
   assert.equal(v1.photoCount, 0);
