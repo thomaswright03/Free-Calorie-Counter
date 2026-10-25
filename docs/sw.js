@@ -15,7 +15,7 @@
 // which pre-caches the whole new set together, so a phone that goes offline
 // right after an update still has matching files. A test checks every
 // listed file exists.
-const CACHE_NAME = 'fcc-e20192992b0e';
+const CACHE_NAME = 'fcc-57652b8ff8be';
 
 const APP_SHELL = [
   './',
